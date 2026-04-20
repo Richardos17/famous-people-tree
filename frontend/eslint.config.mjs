@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated outputs that should not be linted.
+    "coverage/**",
+    "types/routes.d.ts",
+    "types/validator.ts",
   ]),
 ]);
 
