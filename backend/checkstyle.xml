@@ -1,0 +1,109 @@
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+    <!-- ========================= -->
+    <!-- FILE LEVEL RULES -->
+    <!-- ========================= -->
+
+
+    <!-- Max file length (keeps classes manageable) -->
+    <module name="FileLength">
+        <property name="max" value="800"/>
+    </module>
+
+    <!-- End of file newline -->
+    <module name="NewlineAtEndOfFile"/>
+
+    <!-- ========================= -->
+    <!-- NAMING + STRUCTURE -->
+    <!-- ========================= -->
+
+    <module name="TreeWalker">
+
+        <!-- Classes: PascalCase -->
+        <module name="TypeName"/>
+
+        <!-- Methods: camelCase -->
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Variables: camelCase -->
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Constants: UPPER_CASE -->
+        <module name="ConstantName"/>
+
+        <!-- Packages: lowercase -->
+        <module name="PackageName"/>
+
+        <!-- ========================= -->
+        <!-- IMPORT RULES -->
+        <!-- ========================= -->
+
+        <!-- No unused imports -->
+        <module name="UnusedImports"/>
+
+        <!-- No wildcard imports (VERY IMPORTANT for clean backend) -->
+        <module name="AvoidStarImport"/>
+
+        <!-- Ordered imports -->
+        <module name="CustomImportOrder">
+            <property name="sortImportsInGroupAlphabetically" value="true"/>
+            <property name="separateLineBetweenGroups" value="true"/>
+        </module>
+
+        <!-- ========================= -->
+        <!-- CODE QUALITY -->
+        <!-- ========================= -->
+
+        <!-- Require braces for all blocks -->
+        <module name="NeedBraces"/>
+
+        <!-- No empty blocks -->
+        <module name="EmptyBlock"/>
+
+        <!-- No unnecessary semicolons -->
+        <module name="EmptyStatement"/>
+
+        <!-- Prevent magic numbers -->
+        <module name="MagicNumber">
+            <property name="ignoreNumbers" value="-1,0,1"/>
+        </module>
+
+
+        <!-- ========================= -->
+        <!-- WHITESPACE RULES -->
+        <!-- ========================= -->
+
+        <module name="WhitespaceAfter"/>
+        <module name="WhitespaceAround"/>
+
+
+        <!-- ========================= -->
+        <!-- DESIGN QUALITY -->
+        <!-- ========================= -->
+
+        <!-- Avoid long methods -->
+        <module name="MethodLength">
+            <property name="max" value="50"/>
+        </module>
+
+        <!-- Avoid deep nesting -->
+        <module name="NestedIfDepth">
+            <property name="max" value="3"/>
+        </module>
+
+        <!-- Cyclomatic complexity (basic control flow complexity) -->
+        <module name="CyclomaticComplexity">
+            <property name="max" value="10"/>
+        </module>
+
+    </module>
+
+</module>
