@@ -38,3 +38,5 @@
 - As a user, I want to get the average height of all ancestors of a certain person.
 - As a user, I want to get the most popular universities attended by ancestors and relatives of a certain person.
 - As a user, I want to get the most common jobs of ancestors/relatives.
+- As a user, I want to get the most common languages spoken by ancestors/relatives.
+- As a user, I want to be able to suggest new relationships which are not on wikidata or add new sources of relationships

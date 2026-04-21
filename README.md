@@ -97,8 +97,9 @@ Wikidata API (external data source)
 - [ ] Relationship finder
 - [ ] Advanced analytics
 - [ ] Export features (PDF/image)
+- [ ] Suggest new relationships/add new sources
 
-### Phase 5 - Performance
+### Phase 4.5 - Performance
 - [ ] Performance optimizations
 - [ ] Caching (Redis)
 

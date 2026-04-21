@@ -1,0 +1,38 @@
+name: BackendCI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
+      - run: chmod +x mvnw
+
+      - name: Run Checkstyle
+        run: mvn checkstyle:check
+        working-directory: backend
+
+      - name: Build & Test
+        run: ./mvnw clean verify
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
