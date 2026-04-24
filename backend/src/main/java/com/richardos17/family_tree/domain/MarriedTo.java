@@ -19,7 +19,7 @@ import java.util.Date;
 public class MarriedTo {
     @Id
     @GeneratedValue
-    private Long id;
+    private String id;
 
     @TargetNode
     private Person spouse;
