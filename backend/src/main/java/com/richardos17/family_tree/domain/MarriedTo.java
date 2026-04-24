@@ -9,7 +9,8 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.RelationshipProperties;
 import org.springframework.data.neo4j.core.schema.TargetNode;
 
-import java.util.Date;
+import java.time.LocalDate;
+
 
 @RelationshipProperties
 @NoArgsConstructor
@@ -19,10 +20,10 @@ import java.util.Date;
 public class MarriedTo {
     @Id
     @GeneratedValue
-    private Long id;
+    private String id;
 
     @TargetNode
     private Person spouse;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }

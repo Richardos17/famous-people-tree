@@ -9,7 +9,8 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
-import java.util.Date;
+import java.time.LocalDate;
+
 import java.util.List;
 
 import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
@@ -27,18 +28,18 @@ public class Person {
 
     private String wikidataId;
     private String name;
-    private Date birthdate;
-    private Date deathdate;
+    private LocalDate birthdate;
+    private LocalDate deathdate;
     private String imageLink;
     private String wikipediaLink;
     private Integer height;
 
-    @Relationship(type = "HasParent")
-    private List<Person> parents;
+    @Relationship(type = "HAS_PARENT")
+    private List<HasParent> parents;
 
-    @Relationship(type = "MarriedTo")
-    private List<Person> spouses;
+    @Relationship(type = "MARRIED_TO")
+    private List<MarriedTo> spouses;
 
-    @Relationship(type = "BornIn", direction = OUTGOING)
+    @Relationship(type = "BORN_IN", direction = OUTGOING)
     private Country bornIn;
 }
