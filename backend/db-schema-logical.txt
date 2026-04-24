@@ -1,0 +1,12 @@
+Person(id, name, birthdate, deathdate, image_link, wikipedia_link, height)
+MARRIED_TO(person_id1, person_id2, start_date, end_date)
+HAS_PARENT(person_id_child, person_id_parent, type)
+Country(id, name)
+BORN_IN(person_id, country_id)
+CITIZEN_OF(person_id, country_id, start_date, end_date)
+
+University(id, name)
+STUDIED_AT(person_id, university_id, start_date, end_date)
+LOCATED_IN(university_id, country_id)
+Occupation(id, name)
+HAS_OCCUPATION(person_id, occupation_id, country_id, start_date, end_date)
