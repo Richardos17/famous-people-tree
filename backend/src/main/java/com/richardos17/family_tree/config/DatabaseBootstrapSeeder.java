@@ -1,9 +1,10 @@
 package com.richardos17.family_tree.config;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Component;
-
+@Profile("db-refresh")
 @Component
 public class DatabaseBootstrapSeeder implements CommandLineRunner {
 
