@@ -2,14 +2,17 @@ package com.richardos17.family_tree.config;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Component;
 
-
+@Profile("db-refresh")
 @Component
 public class MigrationRunner implements CommandLineRunner {
 
@@ -24,6 +27,42 @@ public class MigrationRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+
+        System.out.println("Running migrations...");
+
+        // DROP CONSTRAINTS
+        List<Map<String, Object>> constraints = (List<Map<String, Object>>) neo4jClient.query("""
+                SHOW CONSTRAINTS YIELD name
+                RETURN name
+                """)
+                .fetch()
+                .all();
+
+        for (Map<String, Object> row : constraints) {
+            String name = (String) row.get("name");
+
+            neo4jClient.query("DROP CONSTRAINT `" + name + "` IF EXISTS")
+                    .run();
+
+            System.out.println("Dropped constraint: " + name);
+        }
+        // DROP INDEXES
+        List<Map<String, Object>> indexes = (List<Map<String, Object>>) neo4jClient.query("""
+                SHOW INDEXES YIELD name, type
+                WHERE type <> 'LOOKUP'
+                RETURN name
+                """)
+                .fetch()
+                .all();
+
+        for (Map<String, Object> row : indexes) {
+            String name = (String) row.get("name");
+
+            neo4jClient.query("DROP INDEX `" + name + "` IF EXISTS")
+                    .run();
+
+            System.out.println("Dropped index: " + name);
+        }
         Resource[] resources = resourceResolver.getResources(
                 "classpath:db/migrations/*.cypher"
         );
