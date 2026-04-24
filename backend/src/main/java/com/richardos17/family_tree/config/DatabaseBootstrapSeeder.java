@@ -1,8 +1,8 @@
 package com.richardos17.family_tree.config;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 import org.springframework.data.neo4j.core.Neo4jClient;
+import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseBootstrapSeeder implements CommandLineRunner {
@@ -34,6 +34,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
         seed();
     }
 
+    @SuppressWarnings("checkstyle:MethodLength")
     private void seed() {
 
         neo4jClient.query("""

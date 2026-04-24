@@ -1,5 +1,7 @@
 package com.richardos17.family_tree.config;
-
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -7,9 +9,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 @Component
 public class MigrationRunner implements CommandLineRunner {

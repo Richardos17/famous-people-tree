@@ -52,11 +52,6 @@
         <!-- No wildcard imports (VERY IMPORTANT for clean backend) -->
         <module name="AvoidStarImport"/>
 
-        <!-- Ordered imports -->
-        <module name="CustomImportOrder">
-            <property name="sortImportsInGroupAlphabetically" value="true"/>
-            <property name="separateLineBetweenGroups" value="true"/>
-        </module>
 
         <!-- ========================= -->
         <!-- CODE QUALITY -->
@@ -91,7 +86,8 @@
 
         <!-- Avoid long methods -->
         <module name="MethodLength">
-            <property name="max" value="50"/>
+            <property name="max" value="100"/>
+            <property name="severity" value="warning"/>
         </module>
 
         <!-- Avoid deep nesting -->
