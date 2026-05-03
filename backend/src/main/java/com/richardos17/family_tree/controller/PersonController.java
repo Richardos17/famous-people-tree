@@ -1,5 +1,6 @@
 package com.richardos17.family_tree.controller;
 
+import com.richardos17.family_tree.domain.FamilyRelationship;
 import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,9 +22,21 @@ public class PersonController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Person> getPersonById(@PathVariable String id) {
-        return personRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Person> optionalPerson = personRepository.findByLocalId(id);
+
+        if (optionalPerson.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Person person = optionalPerson.get();
+
+        List<FamilyRelationship<Person>> children = personRepository.findChildrenByParentId(id);
+        person.setChildren(children);
+
+        List<FamilyRelationship<Person>> parents = personRepository.findParentsByChildId(id);
+        person.setParents(parents);
+
+        return ResponseEntity.ok(person);
     }
 
     @GetMapping("/name/{name}")
@@ -33,6 +47,7 @@ public class PersonController {
         }
         return ResponseEntity.ok(people);
     }
+    
     @GetMapping("/search")
     public ResponseEntity<List<Person>> getPersonSearch(@RequestParam String name) {
         List<Person> people = personRepository.findByNameContainingIgnoreCase(name);
@@ -41,17 +56,19 @@ public class PersonController {
         }
         return ResponseEntity.ok(people);
     }
-    @GetMapping("/{id}/children")
-    public ResponseEntity<List<Person>> getChildren(@PathVariable String id) {
-        List<Person> people = personRepository.findChildrenByParentId(id);
+    
+    @GetMapping("/{id}/parents")
+    public ResponseEntity<List<FamilyRelationship<Person>>> getParents(@PathVariable String id) {
+        List<FamilyRelationship<Person>> people = personRepository.findParentsByChildId(id);
         if (people.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(people);
     }
-    @GetMapping("/{id}/parents")
-    public ResponseEntity<List<Person>> getParents(@PathVariable String id) {
-        List<Person> people = personRepository.findParentsByChildId(id);
+    
+    @GetMapping("/{id}/children")
+    public ResponseEntity<List<FamilyRelationship<Person>>> getChildren(@PathVariable String id) {
+        List<FamilyRelationship<Person>> people = personRepository.findChildrenByParentId(id);
         if (people.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

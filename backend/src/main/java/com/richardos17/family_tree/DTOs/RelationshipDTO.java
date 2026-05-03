@@ -1,4 +1,4 @@
-package com.richardos17.family_tree.domain;
+package com.richardos17.family_tree.DTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ChildRelationship {
-    private Person child;
+public class RelationshipDTO<T> {
+    private T entity;
     private String type;
 }

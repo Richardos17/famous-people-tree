@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ChildRelationship {
-    private Person child;
+public class FamilyRelationship<T> {
+    private T entity;
     private String type;
 }

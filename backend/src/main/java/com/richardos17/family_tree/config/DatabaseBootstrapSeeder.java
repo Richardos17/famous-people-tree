@@ -39,13 +39,13 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
     private void seed() {
 
         neo4jClient.query("""
-                MERGE (usa:Country {id:"C1", name:"United States"})
-                MERGE (uk:Country {id:"C2", name:"United Kingdom"})
-                MERGE (fr:Country {id:"C3", name:"France"})
-                MERGE (de:Country {id:"C4", name:"Germany"})
+                MERGE (usa:Country {localId:"C1", name:"United States"})
+                MERGE (uk:Country {localId:"C2", name:"United Kingdom"})
+                MERGE (fr:Country {localId:"C3", name:"France"})
+                MERGE (de:Country {localId:"C4", name:"Germany"})
                 
                 MERGE (john:Person {
-                  id:"P1",
+                  localId:"P1",
                   name:"John Adams",
                   birthdate:date("1940-02-10"),
                   deathdate:date("2010-06-01"),
@@ -55,7 +55,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 })
                 
                 MERGE (mary:Person {
-                  id:"P2",
+                  localId:"P2",
                   name:"Mary Adams",
                   birthdate:date("1945-05-21"),
                   deathdate:date("2018-09-12"),
@@ -74,7 +74,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                
                 
                 MERGE (peter:Person {
-                  id:"P3",
+                  localId:"P3",
                   name:"Peter Adams",
                   birthdate:date("1968-03-14"),
                   image_link:"https://example.com/peter.jpg",
@@ -83,7 +83,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 })
                 
                 MERGE (lisa:Person {
-                  id:"P4",
+                  localId:"P4",
                   name:"Lisa Adams",
                   birthdate:date("1970-11-02"),
                   image_link:"https://example.com/lisa.jpg",
@@ -104,7 +104,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 MERGE (lisa)-[:HAS_PARENT {type:"biological", source:"bootstrap"}]->(mary)
                 
                 MERGE (anna:Person {
-                  id:"P5",
+                  localId:"P5",
                   name:"Anna Müller",
                   birthdate:date("1972-07-19"),
                   image_link:"https://example.com/anna.jpg",
@@ -119,7 +119,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 MERGE (anna)-[:CITIZEN_OF {start_date:date("1972-07-19"), end_date:date("2024-12-31")}]->(de)
                 
                 MERGE (emma:Person {
-                  id:"P6",
+                  localId:"P6",
                   name:"Emma Adams",
                   birthdate:date("1998-01-12"),
                   image_link:"https://example.com/emma.jpg",
@@ -128,7 +128,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 })
                 
                 MERGE (noah:Person {
-                  id:"P7",
+                  localId:"P7",
                   name:"Noah Adams",
                   birthdate:date("2001-06-25"),
                   image_link:"https://example.com/noah.jpg",
@@ -149,7 +149,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 MERGE (noah)-[:CITIZEN_OF {start_date:date("2001-06-25"), end_date:date("2024-12-31")}]->(de)
                 
                 MERGE (lucas:Person {
-                  id:"P8",
+                  localId:"P8",
                   name:"Lucas Martin",
                   birthdate:date("1997-09-09"),
                   image_link:"https://example.com/lucas.jpg",
@@ -158,7 +158,7 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 })
                 
                 MERGE (sophie:Person {
-                  id:"P9",
+                  localId:"P9",
                   name:"Sophie Martin",
                   birthdate:date("1999-12-30"),
                   image_link:"https://example.com/sophie.jpg",
