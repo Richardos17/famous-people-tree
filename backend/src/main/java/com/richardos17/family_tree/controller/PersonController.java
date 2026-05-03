@@ -41,4 +41,20 @@ public class PersonController {
         }
         return ResponseEntity.ok(people);
     }
+    @GetMapping("/{id}/children")
+    public ResponseEntity<List<Person>> getChildren(@PathVariable String id) {
+        List<Person> people = personRepository.findChildrenByParentId(id);
+        if (people.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(people);
+    }
+    @GetMapping("/{id}/parents")
+    public ResponseEntity<List<Person>> getParents(@PathVariable String id) {
+        List<Person> people = personRepository.findParentsByChildId(id);
+        if (people.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(people);
+    }
 }
