@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequestMapping("/person")
 public class PersonController {
 
-    private static final int DEFAULT_TREE_DEPTH = 4;
+    private static final int DEFAULT_TREE_DEPTH = 2;
 
     private final PersonRepository personRepository;
     private final PersonService personService;
