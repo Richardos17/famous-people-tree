@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDate;
@@ -24,7 +25,9 @@ public class Person {
     private String name;
     private LocalDate birthdate;
     private LocalDate deathdate;
+    @Property("image_link")
     private String imageLink;
+    @Property("wikipedia_link")
     private String wikipediaLink;
     private Integer height;
 
