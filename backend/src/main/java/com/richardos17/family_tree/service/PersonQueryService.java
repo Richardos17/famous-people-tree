@@ -1,13 +1,11 @@
 package com.richardos17.family_tree.service;
 
 import com.richardos17.family_tree.DTOs.PersonDTO;
-import com.richardos17.family_tree.domain.FamilyRelationship;
 import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -17,16 +15,12 @@ public class PersonQueryService {
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
 
-    public Person combinePerson(Person person) {
-        List<FamilyRelationship> children = personRepository.findChildrenByParentId(person.getLocalId());
-        Person personCopy = new Person(person);
-        personCopy.setChildren(children);
-        return personCopy;
-    }
-
-    private Person loadPersonWithChildren(String id) {
+    /**
+     * Load a basic PersonDTO (only person data, no relationships)
+     */
+    private PersonDTO loadBasicPersonDTO(String id) {
         return personRepository.findByLocalId(id)
-                .map(this::combinePerson)
+                .map(personMapper::toDTO)
                 .orElse(null);
     }
     /**
@@ -35,15 +29,15 @@ public class PersonQueryService {
      * - Children traverse only downwards (children of children, etc.)
      */
     public PersonDTO buildSimplePersonTree(String id, int depth) {
-        Person person = loadPersonWithChildren(id);
-        if (person == null) {
+        PersonDTO dto = loadBasicPersonDTO(id);
+        if (dto == null) {
             return null;
         }
-        PersonDTO dto = personMapper.toDTO(person);
 
         // Traverse parents upwards only
-        if (person.getParents() != null) {
-            dto.setParents(person.getParents().stream()
+        var parents = personRepository.findParentsByChildId(id);
+        if (!parents.isEmpty()) {
+            dto.setParents(parents.stream()
                     .map(parentRel -> {
                         PersonDTO parentDTO = traverseUpwards(
                                 parentRel.getEntity().getLocalId(),
@@ -56,8 +50,9 @@ public class PersonQueryService {
         }
 
         // Traverse children downwards only
-        if (person.getChildren() != null) {
-            dto.setChildren(person.getChildren().stream()
+        var children = personRepository.findChildrenByParentId(id);
+        if (!children.isEmpty()) {
+            dto.setChildren(children.stream()
                     .map(childRel -> {
                         PersonDTO childDTO = traverseDownwards(
                                 childRel.getEntity().getLocalId(),
@@ -89,16 +84,15 @@ public class PersonQueryService {
 
         visited.add(id);
 
-        Person person = personRepository.findByLocalId(id).orElse(null);
-        if (person == null) {
+        PersonDTO dto = loadBasicPersonDTO(id);
+        if (dto == null) {
             return null;
         }
 
-        PersonDTO dto = personMapper.toDTO(person);
-
         // Only traverse parents
-        if (person.getParents() != null) {
-            dto.setParents(person.getParents().stream()
+        var parents = personRepository.findParentsByChildId(id);
+        if (!parents.isEmpty()) {
+            dto.setParents(parents.stream()
                     .map(parentRel -> {
                         PersonDTO parentDTO = traverseUpwards(
                                 parentRel.getEntity().getLocalId(),
@@ -123,16 +117,15 @@ public class PersonQueryService {
 
         visited.add(id);
 
-        Person person = personRepository.findByLocalId(id).orElse(null);
-        if (person == null) {
+        PersonDTO dto = loadBasicPersonDTO(id);
+        if (dto == null) {
             return null;
         }
 
-        PersonDTO dto = personMapper.toDTO(person);
-
         // Only traverse children
-        if (person.getChildren() != null) {
-            dto.setChildren(person.getChildren().stream()
+        var children = personRepository.findChildrenByParentId(id);
+        if (!children.isEmpty()) {
+            dto.setChildren(children.stream()
                     .map(childRel -> {
                         PersonDTO childDTO = traverseDownwards(
                                 childRel.getEntity().getLocalId(),
@@ -151,22 +144,21 @@ public class PersonQueryService {
      * Traverses the full family tree in both directions recursively
      */
     private PersonDTO buildFullTree(String id, int depth, Set<String> visited) {
-        Person person = loadPersonWithChildren(id);
-        if (person == null) {
+        PersonDTO dto = loadBasicPersonDTO(id);
+        if (dto == null) {
             return null;
         }
         // If depth is 0 or already visited, return person without relationships
         if (depth == 0 || visited.contains(id)) {
-            return personMapper.toDTO(person);
+            return dto;
         }
 
         visited.add(id);
 
-        PersonDTO dto = personMapper.toDTO(person);
-
-        // Traverse both parents and children recursively
-        if (person.getParents() != null) {
-            dto.setParents(person.getParents().stream()
+        // Traverse parents recursively
+        var parents = personRepository.findParentsByChildId(id);
+        if (!parents.isEmpty()) {
+            dto.setParents(parents.stream()
                     .map(parentRel -> {
                         PersonDTO parentDTO = buildFullTree(
                                 parentRel.getEntity().getLocalId(),
@@ -178,8 +170,10 @@ public class PersonQueryService {
                     .toList());
         }
 
-        if (person.getChildren() != null) {
-            dto.setChildren(person.getChildren().stream()
+        // Traverse children recursively
+        var children = personRepository.findChildrenByParentId(id);
+        if (!children.isEmpty()) {
+            dto.setChildren(children.stream()
                     .map(childRel -> {
                         PersonDTO childDTO = buildFullTree(
                                 childRel.getEntity().getLocalId(),
@@ -190,9 +184,11 @@ public class PersonQueryService {
                     })
                     .toList());
         }
+
         // Traverse spouses recursively
-        if (person.getSpouses() != null) {
-            dto.setSpouses(person.getSpouses().stream()
+        var spouses = personRepository.findByLocalId(id).map(Person::getSpouses).orElse(null);
+        if (spouses != null && !spouses.isEmpty()) {
+            dto.setSpouses(spouses.stream()
                     .map(marriedTo -> {
                         PersonDTO spouseDTO = buildFullTree(
                                 marriedTo.getSpouse().getLocalId(),

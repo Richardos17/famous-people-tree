@@ -2,7 +2,6 @@ package com.richardos17.family_tree.controller;
 
 import com.richardos17.family_tree.DTOs.PersonDTO;
 import com.richardos17.family_tree.DTOs.RelationshipDTO;
-import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.PersonRepository;
 import com.richardos17.family_tree.service.PersonMapper;
 import com.richardos17.family_tree.service.PersonQueryService;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,38 +26,28 @@ public class PersonController {
     private final PersonQueryService personQueryService;
     private final PersonMapper personMapper;
 
-    private ResponseEntity<List<PersonDTO>> respondWithPeople(List<Person> people) {
-        if (people.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(people.stream()
-                .map(personQueryService::combinePerson)
-                .map(personMapper::toDTO)
-                .toList());
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<PersonDTO> getPersonById(@PathVariable String id) {
-        Optional<Person> optionalPerson = personRepository.findByLocalId(id);
-
-        if (optionalPerson.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        PersonDTO person = personMapper.toDTO(personQueryService.combinePerson(optionalPerson.get()));
-        return ResponseEntity.ok(person);
+        return personRepository.findByLocalId(id)
+                .map(person -> personMapper.toDTO(person))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<List<PersonDTO>> getPersonByName(@PathVariable String name) {
-        List<Person> people = personRepository.findByName(name);
-        return respondWithPeople(people);
+        List<PersonDTO> people = personRepository.findByName(name).stream()
+                .map(personMapper::toDTO)
+                .toList();
+        return people.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(people);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<PersonDTO>> getPersonSearch(@RequestParam String name) {
-        List<Person> people = personRepository.searchByName(name);
-        return respondWithPeople(people);
+        List<PersonDTO> people = personRepository.searchByName(name).stream()
+                .map(personMapper::toDTO)
+                .toList();
+        return people.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(people);
     }
 
     @GetMapping("/{id}/parents")
@@ -69,10 +57,7 @@ public class PersonController {
             .map(personMapper::relationshipToDTO)
             .toList();
 
-        if (parentDTOs.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(parentDTOs);
+        return parentDTOs.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(parentDTOs);
     }
 
     @GetMapping("/{id}/children")
@@ -82,10 +67,7 @@ public class PersonController {
             .map(personMapper::relationshipToDTO)
             .toList();
 
-        if (childrenDTOs.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(childrenDTOs);
+        return childrenDTOs.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(childrenDTOs);
     }
 
     @GetMapping("/{id}/full_tree")

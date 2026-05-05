@@ -10,6 +10,7 @@ import com.richardos17.family_tree.domain.MarriedTo;
 import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.CountryRepository;
 import com.richardos17.family_tree.repository.PersonRepository;
+import com.richardos17.family_tree.utils.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.util.NoSuchElementException;
 public class PersonCreateService {
     private final PersonRepository personRepository;
     private final CountryRepository countryRepository;
+    private final IdGenerator idGenerator;
 
     public Person createPerson(PersonDTO personDTO) {
         Person person = Person.builder()
@@ -32,7 +34,7 @@ public class PersonCreateService {
                 .imageLink(personDTO.getImageLink())
                 .wikipediaLink(personDTO.getWikipediaLink())
                 .height(personDTO.getHeight())
-                .localId(personDTO.getLocalId())
+                .localId(idGenerator.generateUniquePersonId())
                 .wikidataId(personDTO.getWikidataId())
                 .build();
 

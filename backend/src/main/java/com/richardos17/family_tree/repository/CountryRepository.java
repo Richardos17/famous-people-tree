@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface CountryRepository extends Neo4jRepository<Country, String> {
     Optional<Country> findByName(String name);
+    @Query("MATCH (c:Country {localId: $localId}) RETURN COUNT(c) > 0")
+    boolean existsByLocalId(String localId);
 }

@@ -37,18 +37,6 @@ public class PersonMapper {
                     .map(this::marriageToDTO)
                     .toList());
         }
-        if (person.getParents() != null) {
-            dto.setParents(person.getParents().stream()
-                    .map(this::relationshipToDTO)
-                    .toList());
-        }
-        if (person.getChildren() != null) {
-            dto.setChildren(person.getChildren().stream()
-                    .map(this::relationshipToDTO)
-                    .toList());
-        }
-
-
         return dto;
     }
 

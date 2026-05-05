@@ -74,4 +74,7 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
                 r.type AS type
                           """)
     List<FamilyRelationship> findChildrenByParentId(String id);
+
+    @Query("MATCH (p:Person {localId: $localId}) RETURN COUNT(p) > 0")
+    boolean existsByLocalId(String localId);
 }
