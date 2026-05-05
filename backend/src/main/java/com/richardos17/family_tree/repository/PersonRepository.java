@@ -12,80 +12,68 @@ import java.util.Optional;
 @Repository
 public interface PersonRepository extends Neo4jRepository<Person, String> {
     @Query("""
-    MATCH (p:Person {localId: $id})
-    
-    // parents (depth 1)
-    OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
-    
-    OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
-    OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
+            MATCH (p:Person {localId: $id})
 
-    
-    RETURN p,
-           collect(DISTINCT rP),
-                  collect(DISTINCT parent),
-                  collect(DISTINCT rM),
-                  collect(DISTINCT spouse),
-                  collect(DISTINCT country)
+            OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
+            OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
+            OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
+
+            RETURN p,
+                   collect(DISTINCT rP),
+                   collect(DISTINCT parent),
+                   collect(DISTINCT rM),
+                   collect(DISTINCT spouse),
+                   collect(DISTINCT country)
     """)
     Optional<Person> findByLocalId(String id);
 
     @Query("""
-    MATCH (p:Person {name: $name})
-    
-    // parents (depth 1)
-    OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
+            MATCH (p:Person {name: $name})
 
-    
-    OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
-    OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
+            OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
+            OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
+            OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
 
-    
-    RETURN p,
-           collect(DISTINCT rP),
-                  collect(DISTINCT parent),
-                  collect(DISTINCT rM),
-                  collect(DISTINCT spouse),
-                  collect(DISTINCT country)
+            RETURN p,
+                   collect(DISTINCT rP),
+                   collect(DISTINCT parent),
+                   collect(DISTINCT rM),
+                   collect(DISTINCT spouse),
+                   collect(DISTINCT country)
     """)
     List<Person> findByName(String name);
     @Query("""
-    MATCH (p:Person)
-    WHERE  toLower(p.name) CONTAINS toLower($name)
+            MATCH (p:Person)
+            WHERE toLower(p.name) CONTAINS toLower($name)
 
-    // parents (depth 1)
-    OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
-    
+            OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
+            OPTIONAL MATCH (p)-[:BORN_IN]->(country)
+            OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
 
-    
-    OPTIONAL MATCH (p)-[:BORN_IN]->(country)
-    OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
-
-    
-    RETURN p,
-           collect(DISTINCT rP),
-                  collect(DISTINCT parent),
-                  collect(DISTINCT rM),
-                  collect(DISTINCT spouse),
-                  collect(DISTINCT country)
+            RETURN p,
+                   collect(DISTINCT rP),
+                   collect(DISTINCT parent),
+                   collect(DISTINCT rM),
+                   collect(DISTINCT spouse),
+                   collect(DISTINCT country)
     """)
     List<Person> searchByName(String name);
 
     @Query("""
-    MATCH (parent:Person)<-[r:HAS_PARENT]-(:Person {localId: $id})
-    RETURN
-        parent AS entity,
-        r.type AS type,
-        id(r) as id
+            MATCH (parent:Person)<-[r:HAS_PARENT]-(:Person {localId: $id})
+            RETURN
+                parent AS entity,
+                r.type AS type,
+                id(r) AS id
                           """)
     List<FamilyRelationship> findParentsByChildId(String id);
     
     @Query("""
-    MATCH (child:Person)-[r:HAS_PARENT]->(:Person {localId: $id})
-    RETURN 
-        child AS entity,
-        r.type AS type,
-        id(r) as id
+            MATCH (child:Person)-[r:HAS_PARENT]->(:Person {localId: $id})
+            RETURN
+                child AS entity,
+                r.type AS type,
+                id(r) AS id
                           """)
     List<FamilyRelationship> findChildrenByParentId(String id);
 }

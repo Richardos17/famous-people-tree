@@ -28,6 +28,16 @@ public class PersonController {
     private final PersonService personService;
     private final PersonMapper personMapper;
 
+    private ResponseEntity<List<PersonDTO>> respondWithPeople(List<Person> people) {
+        if (people.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(people.stream()
+                .map(personService::combinePerson)
+                .map(personMapper::toDTO)
+                .toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PersonDTO> getPersonById(@PathVariable String id) {
         Optional<Person> optionalPerson = personRepository.findByLocalId(id);
@@ -43,20 +53,13 @@ public class PersonController {
     @GetMapping("/name/{name}")
     public ResponseEntity<List<PersonDTO>> getPersonByName(@PathVariable String name) {
         List<Person> people = personRepository.findByName(name);
-
-        if (people.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(people.stream().map(personService::combinePerson).map(personMapper::toDTO).toList());
+        return respondWithPeople(people);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<PersonDTO>> getPersonSearch(@RequestParam String name) {
         List<Person> people = personRepository.searchByName(name);
-        if (people.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(people.stream().map(personService::combinePerson).map(personMapper::toDTO).toList());
+        return respondWithPeople(people);
     }
 
     @GetMapping("/{id}/parents")

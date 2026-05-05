@@ -16,11 +16,18 @@ import java.util.HashSet;
 public class PersonService {
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
-       public Person combinePerson(Person person) {
+
+    public Person combinePerson(Person person) {
         List<FamilyRelationship> children = personRepository.findChildrenByParentId(person.getLocalId());
         Person personCopy = new Person(person);
         personCopy.setChildren(children);
         return personCopy;
+    }
+
+    private Person loadPersonWithChildren(String id) {
+        return personRepository.findByLocalId(id)
+                .map(this::combinePerson)
+                .orElse(null);
     }
     /**
      * Builds a simple tree recursively but in one direction per branch:
@@ -28,11 +35,10 @@ public class PersonService {
      * - Children traverse only downwards (children of children, etc.)
      */
     public PersonDTO buildSimplePersonTree(String id, int depth) {
-        Person person = personRepository.findByLocalId(id).orElse(null);
+        Person person = loadPersonWithChildren(id);
         if (person == null) {
             return null;
         }
-        person = combinePerson(person);
         PersonDTO dto = personMapper.toDTO(person);
 
         // Traverse parents upwards only
@@ -145,11 +151,10 @@ public class PersonService {
      * Traverses the full family tree in both directions recursively
      */
     private PersonDTO buildFullTree(String id, int depth, Set<String> visited) {
-        Person person = personRepository.findByLocalId(id).orElse(null);
+        Person person = loadPersonWithChildren(id);
         if (person == null) {
             return null;
         }
-        person = combinePerson(person);
         // If depth is 0 or already visited, return person without relationships
         if (depth == 0 || visited.contains(id)) {
             return personMapper.toDTO(person);
