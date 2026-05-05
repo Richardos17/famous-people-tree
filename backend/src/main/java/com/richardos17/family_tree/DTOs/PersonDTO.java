@@ -26,7 +26,7 @@ public class PersonDTO {
 
     private CountryDTO bornIn;
 
-    private List<RelationshipDTO<PersonDTO>> parents;
+    private List<RelationshipDTO> parents;
 
-    private List<RelationshipDTO<PersonDTO>> children;
+    private List<RelationshipDTO> children;
 }

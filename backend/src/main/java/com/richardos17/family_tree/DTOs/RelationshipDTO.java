@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class RelationshipDTO<T> {
-    private T entity;
+public class RelationshipDTO {
+    private PersonDTO person;
     private String type;
 }

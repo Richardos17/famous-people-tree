@@ -1,6 +1,5 @@
 package com.richardos17.family_tree.DTOs;
 
-import com.richardos17.family_tree.domain.Person;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

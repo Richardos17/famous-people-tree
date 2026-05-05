@@ -1,6 +1,5 @@
 package com.richardos17.family_tree;
 
-import com.richardos17.family_tree.repository.PersonRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

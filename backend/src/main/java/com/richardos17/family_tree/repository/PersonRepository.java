@@ -15,35 +15,77 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
     MATCH (p:Person {localId: $id})
     
     // parents (depth 1)
-    OPTIONAL MATCH (p)-[:HAS_PARENT]->(parent)
+    OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
     
-    
-    // children (depth 1)
-    OPTIONAL MATCH (child)-[:HAS_PARENT]->(p)
+    OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
+    OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
+
     
     RETURN p,
-           collect(DISTINCT parent) AS parents,
-           collect(DISTINCT child) AS children
+           collect(DISTINCT rP),
+                  collect(DISTINCT parent),
+                  collect(DISTINCT rM),
+                  collect(DISTINCT spouse),
+                  collect(DISTINCT country)
     """)
     Optional<Person> findByLocalId(String id);
 
-    List<Person> findByName(String name);
+    @Query("""
+    MATCH (p:Person {name: $name})
     
-    List<Person> findByNameContainingIgnoreCase(String name);
+    // parents (depth 1)
+    OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
+
+    
+    OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
+    OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
+
+    
+    RETURN p,
+           collect(DISTINCT rP),
+                  collect(DISTINCT parent),
+                  collect(DISTINCT rM),
+                  collect(DISTINCT spouse),
+                  collect(DISTINCT country)
+    """)
+    List<Person> findByName(String name);
+    @Query("""
+    MATCH (p:Person)
+    WHERE  toLower(p.name) CONTAINS toLower($name)
+
+    // parents (depth 1)
+    OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
+    
+
+    
+    OPTIONAL MATCH (p)-[:BORN_IN]->(country)
+    OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
+
+    
+    RETURN p,
+           collect(DISTINCT rP),
+                  collect(DISTINCT parent),
+                  collect(DISTINCT rM),
+                  collect(DISTINCT spouse),
+                  collect(DISTINCT country)
+    """)
+    List<Person> searchByName(String name);
 
     @Query("""
-    MATCH (p:Person)<-[r:HAS_PARENT]-(:Person {localId: $id})
+    MATCH (parent:Person)<-[r:HAS_PARENT]-(:Person {localId: $id})
     RETURN
-        p AS entity,
-        r.type AS type
+        parent AS entity,
+        r.type AS type,
+        id(r) as id
                           """)
-    List<FamilyRelationship<Person>> findParentsByChildId(String id);
+    List<FamilyRelationship> findParentsByChildId(String id);
     
     @Query("""
     MATCH (child:Person)-[r:HAS_PARENT]->(:Person {localId: $id})
     RETURN 
         child AS entity,
-        r.type AS type
+        r.type AS type,
+        id(r) as id
                           """)
-    List<FamilyRelationship<Person>> findChildrenByParentId(String id);
+    List<FamilyRelationship> findChildrenByParentId(String id);
 }
