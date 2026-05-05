@@ -13,7 +13,7 @@ import java.util.HashSet;
 
 @RequiredArgsConstructor
 @Service
-public class PersonService {
+public class PersonQueryService {
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
 

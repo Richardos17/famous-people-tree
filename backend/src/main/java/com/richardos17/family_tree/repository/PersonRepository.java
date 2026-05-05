@@ -63,8 +63,7 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
             MATCH (parent:Person)<-[r:HAS_PARENT]-(:Person {localId: $id})
             RETURN
                 parent AS entity,
-                r.type AS type,
-                id(r) AS id
+                r.type AS type
                           """)
     List<FamilyRelationship> findParentsByChildId(String id);
     
@@ -72,8 +71,7 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
             MATCH (child:Person)-[r:HAS_PARENT]->(:Person {localId: $id})
             RETURN
                 child AS entity,
-                r.type AS type,
-                id(r) AS id
+                r.type AS type
                           """)
     List<FamilyRelationship> findChildrenByParentId(String id);
 }

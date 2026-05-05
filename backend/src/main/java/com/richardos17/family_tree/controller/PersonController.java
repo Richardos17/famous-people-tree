@@ -5,7 +5,7 @@ import com.richardos17.family_tree.DTOs.RelationshipDTO;
 import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.PersonRepository;
 import com.richardos17.family_tree.service.PersonMapper;
-import com.richardos17.family_tree.service.PersonService;
+import com.richardos17.family_tree.service.PersonQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +25,7 @@ public class PersonController {
     private static final int DEFAULT_TREE_DEPTH = 2;
 
     private final PersonRepository personRepository;
-    private final PersonService personService;
+    private final PersonQueryService personQueryService;
     private final PersonMapper personMapper;
 
     private ResponseEntity<List<PersonDTO>> respondWithPeople(List<Person> people) {
@@ -33,7 +33,7 @@ public class PersonController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(people.stream()
-                .map(personService::combinePerson)
+                .map(personQueryService::combinePerson)
                 .map(personMapper::toDTO)
                 .toList());
     }
@@ -46,7 +46,7 @@ public class PersonController {
             return ResponseEntity.notFound().build();
         }
 
-        PersonDTO person = personMapper.toDTO(personService.combinePerson(optionalPerson.get()));
+        PersonDTO person = personMapper.toDTO(personQueryService.combinePerson(optionalPerson.get()));
         return ResponseEntity.ok(person);
     }
 
@@ -90,11 +90,11 @@ public class PersonController {
 
     @GetMapping("/{id}/full_tree")
     public ResponseEntity<PersonDTO> getPersonFullTree(@PathVariable String id) {
-        return ResponseEntity.ok(personService.buildPersonTree(id, DEFAULT_TREE_DEPTH));
+        return ResponseEntity.ok(personQueryService.buildPersonTree(id, DEFAULT_TREE_DEPTH));
     }
 
     @GetMapping("/{id}/simple_tree")
     public ResponseEntity<PersonDTO> getPersonSimpleTree(@PathVariable String id) {
-        return ResponseEntity.ok(personService.buildSimplePersonTree(id, DEFAULT_TREE_DEPTH));
+        return ResponseEntity.ok(personQueryService.buildSimplePersonTree(id, DEFAULT_TREE_DEPTH));
     }
 }

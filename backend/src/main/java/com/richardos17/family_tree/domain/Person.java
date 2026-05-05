@@ -1,8 +1,6 @@
 package com.richardos17.family_tree.domain;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -16,8 +14,9 @@ import static org.springframework.data.neo4j.core.schema.Relationship.Direction.
 
 @Node("Person")
 @NoArgsConstructor
-@Getter
-@Setter
+@AllArgsConstructor
+@Data
+@Builder
 public class Person {
     @Id
     private String localId;
