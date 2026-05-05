@@ -17,7 +17,7 @@ public class Country {
 
     @Id
     @GeneratedValue
-    private String id;
+    private String localId;
 
     private String wikidataId;
 

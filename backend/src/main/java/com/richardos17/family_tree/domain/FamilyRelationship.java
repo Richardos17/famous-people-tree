@@ -8,19 +8,16 @@ import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.RelationshipProperties;
 import org.springframework.data.neo4j.core.schema.TargetNode;
-
 @RelationshipProperties
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class HasParent {
+public class FamilyRelationship {
     @Id
     @GeneratedValue
-    private String id;
-
+    private Long id;
     @TargetNode
-    private Person parent;
-
+    private Person entity;
     private String type;
 }
