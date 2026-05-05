@@ -1,3 +1,3 @@
 CREATE CONSTRAINT person_id IF NOT EXISTS
-FOR (p:Person) REQUIRE p.id IS UNIQUE;
+FOR (p:Person) REQUIRE p.localId IS UNIQUE;
 
