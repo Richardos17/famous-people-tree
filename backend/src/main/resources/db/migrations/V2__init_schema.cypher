@@ -1,2 +1,2 @@
 CREATE CONSTRAINT country_id IF NOT EXISTS
-FOR (c:Country) REQUIRE c.localId IS UNIQUE;
+FOR (c:Country) REQUIRE c.wikidataId IS UNIQUE;

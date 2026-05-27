@@ -11,4 +11,5 @@ import lombok.Setter;
 @Setter
 public class CountryDTO {
     private String name;
+    private String wikidataId;
 }

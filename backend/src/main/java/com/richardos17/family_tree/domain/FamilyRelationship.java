@@ -19,5 +19,4 @@ public class FamilyRelationship {
     private String id;
     @TargetNode
     private Person entity;
-    private String type;
 }

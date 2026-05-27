@@ -1,17 +1,18 @@
 package com.richardos17.family_tree.DTOs;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
+@Builder
+@EqualsAndHashCode(of = "wikidataId")
 public class PersonDTO {
     private String localId;
     private String wikidataId;
@@ -22,11 +23,7 @@ public class PersonDTO {
     private String wikipediaLink;
     private Integer height;
 
-    private List<MarriageDTO> spouses;
 
     private CountryDTO bornIn;
 
-    private List<RelationshipDTO> parents;
-
-    private List<RelationshipDTO> children;
 }

@@ -1,6 +1,7 @@
 package com.richardos17.family_tree.repository;
 
 import com.richardos17.family_tree.domain.FamilyRelationship;
+import com.richardos17.family_tree.domain.MarriedTo;
 import com.richardos17.family_tree.domain.Person;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -26,55 +27,62 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
                    collect(DISTINCT country)
     """)
     Optional<Person> findByLocalId(String id);
-
     @Query("""
-            MATCH (p:Person {name: $name})
+            MATCH (p:Person {wikidataId: $id})
 
-            OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
             OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
-            OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
 
             RETURN p,
-                   collect(DISTINCT rP),
-                   collect(DISTINCT parent),
-                   collect(DISTINCT rM),
-                   collect(DISTINCT spouse),
-                   collect(DISTINCT country)
+                               collect(DISTINCT rB),
+
+                                      collect(DISTINCT country)
     """)
-    List<Person> findByName(String name);
+    Optional<Person> findByWikidataId(String id);
+
     @Query("""
             MATCH (p:Person)
             WHERE toLower(p.name) CONTAINS toLower($name)
 
-            OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
             OPTIONAL MATCH (p)-[:BORN_IN]->(country)
-            OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
 
             RETURN p,
-                   collect(DISTINCT rP),
-                   collect(DISTINCT parent),
-                   collect(DISTINCT rM),
-                   collect(DISTINCT spouse),
                    collect(DISTINCT country)
     """)
     List<Person> searchByName(String name);
 
     @Query("""
-            MATCH (parent:Person)<-[r:HAS_PARENT]-(:Person {localId: $id})
+            MATCH (parent:Person)<-[r:HAS_PARENT]-(:Person {wikidataId: $wikidataId})
+            OPTIONAL MATCH (parent)-[:BORN_IN]-(country:Country)
+            
             RETURN
                 parent AS entity,
+                collect(country) AS bornIn,
                 r.type AS type
                           """)
-    List<FamilyRelationship> findParentsByChildId(String id);
+    List<FamilyRelationship> findParentsByChildId(String wikidataId);
     
     @Query("""
-            MATCH (child:Person)-[r:HAS_PARENT]->(:Person {localId: $id})
+            MATCH (child:Person)-[r:HAS_PARENT]->(:Person {wikidataId: $wikidataId})
+            OPTIONAL MATCH (child)-[rB:BORN_IN]-(country:Country)
             RETURN
                 child AS entity,
+                collect(country) AS bornIn,
                 r.type AS type
                           """)
-    List<FamilyRelationship> findChildrenByParentId(String id);
+    List<FamilyRelationship> findChildrenByParentId(String wikidataId);
+    @Query("""
+            MATCH (spouse:Person)<-[r:MARRIED_TO]-(:Person {wikidataId: $wikidataId})
+            RETURN
+                spouse,
+                r.type AS type,
+                r.start_date as startDate,
+                r.end_date as endDate
+                          """)
+    List<MarriedTo> findSpousesByPersonId(String wikidataId);
 
-    @Query("MATCH (p:Person {localId: $localId}) RETURN COUNT(p) > 0")
-    boolean existsByLocalId(String localId);
+    Boolean existsByLocalId(String localId);
+
+    Boolean existsByWikidataId(String wikidataId);
+
+    Boolean existsByName(String name);
 }

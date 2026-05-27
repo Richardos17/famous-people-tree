@@ -1,13 +1,18 @@
 package com.richardos17.family_tree.domain;
 
-import lombok.*;
-import org.springframework.data.annotation.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
@@ -18,6 +23,7 @@ import static org.springframework.data.neo4j.core.schema.Relationship.Direction.
 @Data
 @Builder
 public class Person {
+    @GeneratedValue(UUIDStringGenerator.class)
     @Id
     private String localId;
     private String wikidataId;
@@ -29,6 +35,8 @@ public class Person {
     @Property("wikipedia_link")
     private String wikipediaLink;
     private Integer height;
+    @Property("relationships_expanded")
+    private Boolean relationshipsExpanded = false;
 
     @Relationship(type = "MARRIED_TO")
     private List<MarriedTo> spouses;
@@ -38,21 +46,26 @@ public class Person {
     @Relationship(type = "HAS_PARENT", direction = OUTGOING)
     private List<FamilyRelationship> parents;
 
-    @Transient
-    private List<FamilyRelationship> children;
 
-    public Person(Person person) {
-        this.localId = person.localId;
-        this.wikidataId = person.wikidataId;
-        this.name = person.name;
-        this.birthdate = person.birthdate;
-        this.deathdate = person.deathdate;
-        this.imageLink = person.imageLink;
-        this.wikipediaLink = person.wikipediaLink;
-        this.height = person.height;
-        this.spouses = person.spouses;
-        this.bornIn = person.bornIn;
-        this.parents = person.parents;
-        this.children = person.children;
+    public void addParent(Person parent) {
+        if (parent == null) {
+            throw new IllegalArgumentException("Parent is required");
+        }
+        if (parents == null) {
+            parents = new ArrayList<>();
+        }
+        parents.add(new FamilyRelationship(null, parent));
+    }
+
+    public void addMarriage(Person spouse, LocalDate startDate, LocalDate endDate) {
+        if (spouse == null) {
+            throw new IllegalArgumentException("Spouse is required");
+        }
+
+        if (spouses == null) {
+            spouses = new ArrayList<>();
+        }
+
+        spouses.add(new MarriedTo(null, spouse, startDate, endDate));
     }
 }
