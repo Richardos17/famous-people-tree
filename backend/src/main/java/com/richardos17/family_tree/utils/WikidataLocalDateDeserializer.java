@@ -1,4 +1,4 @@
-package com.richardos17.family_tree.config;
+package com.richardos17.family_tree.utils;
 
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;

@@ -1,6 +1,6 @@
 package com.richardos17.family_tree.service;
 
-import com.richardos17.family_tree.config.WikidataLocalDateDeserializer;
+import com.richardos17.family_tree.utils.WikidataLocalDateDeserializer;
 import com.richardos17.family_tree.domain.Country;
 import com.richardos17.family_tree.domain.ExpandedPerson;
 import com.richardos17.family_tree.domain.FamilyRelationship;
@@ -327,7 +327,7 @@ public class FetchPerson {
         }
 
         String countryUrl = properties.path("birthCountry").path("value").asString();
-        Country country = countryUrl != null ? Country.builder()
+        Country country = countryUrl != null && !countryUrl.isEmpty() ? Country.builder()
                 .name(properties.path("birthCountryLabel").path("value").asString())
                 .wikidataId(getWikidataIdFromUrl(countryUrl))
                 .build() : null;

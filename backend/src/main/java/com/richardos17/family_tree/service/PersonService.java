@@ -205,4 +205,55 @@ public class PersonService {
             traverseDownwards(childRel.getEntity(), depth - 1, visited, relationships);
         });
     }
+//    private Person buildFullTree(String id, int depth, Set<String> visited) {
+//        Person person = loadBasicPerson(id).get();
+//        if (person == null) {
+//            return null;
+//        }
+//
+//        // If depth is 0 or already visited, return person without relationships
+//        if (depth == 0 || visited.contains(id)) {
+//            return person;
+//        }
+//
+//        visited.add(id);
+//
+//        // Traverse parents recursively
+//        var parents = personRepository.findParentsByChildId(id);
+//        if (!parents.isEmpty()) {
+//            person.setParents(parents.stream()
+//                    .peek(parentRel -> parentRel.setEntity(buildFullTree(
+//                            parentRel.getEntity().getLocalId(),
+//                            depth - 1,
+//                            visited
+//                    )))
+//                    .toList());
+//        }
+//
+//        // Traverse children recursively
+//        var children = personRepository.findChildrenByParentId(id);
+////        if (!children.isEmpty()) {
+////            person.setChildren(children.stream()
+////                    .peek(childRel -> childRel.setEntity(buildFullTree(
+////                            childRel.getEntity().getLocalId(),
+////                            depth - 1,
+////                            visited
+////                    )))
+////                    .toList());
+////        }
+//
+//        // Traverse spouses recursively
+//        var spouses = person.getSpouses();
+//        if (spouses != null && !spouses.isEmpty()) {
+//            person.setSpouses(spouses.stream()
+//                    .peek(marriedTo -> marriedTo.setSpouse(buildFullTree(
+//                            marriedTo.getSpouse().getLocalId(),
+//                            depth - 1,
+//                            visited
+//                    )))
+//                    .toList());
+//        }
+//
+//        return person;
+//    }
 }

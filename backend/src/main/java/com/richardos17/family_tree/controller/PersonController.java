@@ -6,7 +6,6 @@ import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.PersonRepository;
 import com.richardos17.family_tree.service.PersonService;
 import com.richardos17.family_tree.service.PersonMapper;
-import com.richardos17.family_tree.service.PersonQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +25,6 @@ public class PersonController {
     private static final String DEFAULT_TREE_DEPTH = "1";
 
     private final PersonRepository personRepository;
-    private final PersonQueryService personQueryService;
     private final PersonMapper personMapper;
     private final PersonService personService;
 
@@ -46,12 +44,13 @@ public class PersonController {
     }
 
     @GetMapping("/{wikidataId}/full_tree")
-    public ResponseEntity<PersonDTO> getPersonFullTree(@PathVariable String wikidataId, @RequestParam(defaultValue = DEFAULT_TREE_DEPTH) int depth) {
-        Person person = personQueryService.buildPersonTree(wikidataId, depth);
-        if (person == null) {
+    public ResponseEntity<PersonTreeResponseDTO> getPersonFullTree(@PathVariable String wikidataId, @RequestParam(defaultValue = DEFAULT_TREE_DEPTH) int depth) {
+        Optional<PersonTreeResponseDTO> person = personService.getPersonTreeByWikidataId(wikidataId, depth, true);
+        if (person.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(personMapper.toDTO(person));
+        System.out.println(person.get());
+        return ResponseEntity.ok(person.get());
     }
 
     @GetMapping("/{wikidataId}/direct_tree")
