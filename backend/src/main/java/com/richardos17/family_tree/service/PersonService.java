@@ -9,6 +9,7 @@ import com.richardos17.family_tree.domain.ExpandedPerson;
 import com.richardos17.family_tree.domain.FamilyRelationship;
 import com.richardos17.family_tree.domain.MarriedTo;
 import com.richardos17.family_tree.domain.Person;
+import com.richardos17.family_tree.repository.PersonRelationshipRepository;
 import com.richardos17.family_tree.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class PersonService {
     private final FetchPerson fetchPerson;
     private final PersonSaveService personSaveService;
     private final PersonMapper personMapper;
+//    private final FamilyRelationshipMapper familyRelationshipMapper;
+//    private final MarriedToMapper marriedToMapper;
+    private final PersonRelationshipRepository personRelationshipRepository;
 
     /**
      * Retrieves a list of Person objects by their name. The method first searches the local
@@ -122,7 +126,7 @@ public class PersonService {
             personOptional = Optional.of(savedExpandedPerson.person());
             childrenOptional = Optional.of(savedExpandedPerson.childRelationships());
         } else {
-            personOptional.get().setSpouses(personRepository.findSpousesByPersonId(wikidataId));
+            personOptional.get().setSpouses(personRelationshipRepository.findSpousesByPersonId(wikidataId));
         }
         Person person = personOptional.get();
         Set<RelationshipDTO> relationshipDTOS = new HashSet<>();
@@ -138,14 +142,14 @@ public class PersonService {
 
             List<FamilyRelationship> directParents = person.getParents() != null
                     ? person.getParents()
-                    : personRepository.findParentsByChildId(wikidataId);
+                    : personRelationshipRepository.findParentsByChildId(wikidataId);
             directParents.forEach(parentRel -> {
                 relationshipDTOS.add(new ParentRelationshipDTO(wikidataId, parentRel.getEntity().getWikidataId()));
                 persons.add(personMapper.toDTO(parentRel.getEntity()));
             });
 
             List<FamilyRelationship> directChildren = childrenOptional
-                    .orElseGet(() -> personRepository.findChildrenByParentId(wikidataId));
+                    .orElseGet(() -> personRelationshipRepository.findChildrenByParentId(wikidataId));
             directChildren.forEach(childRel -> {
                 relationshipDTOS.add(new ParentRelationshipDTO(childRel.getEntity().getWikidataId(), wikidataId));
                 persons.add(personMapper.toDTO(childRel.getEntity()));
@@ -174,7 +178,7 @@ public class PersonService {
             personSaveService.saveExpandedPerson(expandedPerson);
             parents = expandedPerson.person().getParents() != null ? expandedPerson.person().getParents() : List.of();
         } else {
-            parents = personRepository.findParentsByChildId(person.getWikidataId());
+            parents = personRelationshipRepository.findParentsByChildId(person.getWikidataId());
         }
         parents.forEach(parentRel -> {
             relationships.add(new ParentRelationshipDTO(person.getWikidataId(), parentRel.getEntity().getWikidataId()));
@@ -198,7 +202,7 @@ public class PersonService {
             personSaveService.saveExpandedPerson(expandedPerson);
             children = expandedPerson.childRelationships() != null ? expandedPerson.childRelationships() : List.of();
         } else {
-            children = personRepository.findChildrenByParentId(person.getWikidataId());
+            children = personRelationshipRepository.findChildrenByParentId(person.getWikidataId());
         }
         children.forEach(childRel -> {
             relationships.add(new ParentRelationshipDTO(childRel.getEntity().getWikidataId(), person.getWikidataId()));
