@@ -38,6 +38,22 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
     Optional<Person> findByWikidataId(String id);
 
     @Query("""
+            MATCH (p:Person {wikidataId: $id})
+
+            OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
+            OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
+            OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
+
+            RETURN p,
+                   collect(DISTINCT rP),
+                   collect(DISTINCT parent),
+                   collect(DISTINCT rM),
+                   collect(DISTINCT spouse),
+                   collect(DISTINCT country)
+    """)
+    Optional<Person> findFullByWikidataId(String id);
+
+    @Query("""
             MATCH (p:Person)
             WHERE toLower(p.name) CONTAINS toLower($name)
 

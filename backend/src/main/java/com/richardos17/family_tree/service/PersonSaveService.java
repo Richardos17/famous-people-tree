@@ -33,13 +33,19 @@ public class PersonSaveService {
      * @return The saved person entity with valid localId.
      */
     public Person savePerson(Person person) {
+        if (person == null) {
+            throw new IllegalArgumentException("Person is null");
+        }
+        if (person.getWikidataId() == null || person.getWikidataId().isBlank()) {
+            throw new IllegalArgumentException("Person Wikidata ID is required");
+        }
         resolveCountry(person);
         person.setRelationshipsExpanded(false);
+         if (person.getLocalId() == null) {
+             personRepository.findByWikidataId(person.getWikidataId())
+                     .ifPresent(existing -> person.setLocalId(existing.getLocalId()));
+         }
 
-        Optional<Person> existing = personRepository.findByWikidataId(person.getWikidataId());
-        if (existing.isPresent()) {
-            return existing.get();
-        }
         return personRepository.save(person);
     }
 
@@ -66,6 +72,11 @@ public class PersonSaveService {
         resolveChildren(expandedPerson.person(), expandedPerson.childRelationships());
         resolveCountry(expandedPerson.person());
         expandedPerson.person().setRelationshipsExpanded(true);
+        if (expandedPerson.person().getLocalId() == null) {
+            personRepository.findByWikidataId(expandedPerson.person().getWikidataId())
+                    .ifPresent(existing -> expandedPerson.person().setLocalId(existing.getLocalId()));
+        }
+
         return new ExpandedPerson(personRepository.save(expandedPerson.person()), expandedPerson.childRelationships());
     }
 
