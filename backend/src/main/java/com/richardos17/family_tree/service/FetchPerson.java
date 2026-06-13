@@ -7,12 +7,15 @@ import com.richardos17.family_tree.domain.FamilyRelationship;
 import com.richardos17.family_tree.domain.MarriedTo;
 import com.richardos17.family_tree.domain.Person;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -27,6 +30,9 @@ public class FetchPerson {
 
     private final WebClient wikidataWebClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${wikidata.sparql.base-url}")
+    private String baseUrl;
 
     /**
      * Fetches all persons with the given name.
@@ -291,9 +297,6 @@ public class FetchPerson {
         if (matches.isEmpty()) {
             throw new IllegalStateException("Relative person not found in fetched results: " + wikidataId);
         }
-        if (matches.size() > 1) {
-            throw new IllegalStateException("Multiple persons found with wikidataId: " + wikidataId);
-        }
         return matches.get(0);
     }
 
@@ -346,12 +349,13 @@ public class FetchPerson {
     private JsonNode fetchData(String sparqlQuery) {
         String response;
         try {
+            URI uri = UriComponentsBuilder.fromUriString(baseUrl + "/sparql")
+                    .queryParam("format", "json")
+                    .queryParam("query", sparqlQuery)
+                    .build()
+                    .toUri();
             response = wikidataWebClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/sparql")
-                            .queryParam("format", "json")
-                            .queryParam("query", sparqlQuery)
-                            .build())
+                    .uri(uri)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();

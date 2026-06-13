@@ -3,7 +3,6 @@ package com.richardos17.family_tree.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.dao.DataIntegrityViolationException;
 
 import com.richardos17.family_tree.domain.ExpandedPerson;
 import com.richardos17.family_tree.domain.FamilyRelationship;
@@ -35,14 +34,13 @@ public class PersonSaveService {
      */
     public Person savePerson(Person person) {
         resolveCountry(person);
-
         person.setRelationshipsExpanded(false);
 
-        try {
-            return personRepository.save(person);
-        } catch (DataIntegrityViolationException e) {
-            return personRepository.findByWikidataId(person.getWikidataId()).orElseThrow();
+        Optional<Person> existing = personRepository.findByWikidataId(person.getWikidataId());
+        if (existing.isPresent()) {
+            return existing.get();
         }
+        return personRepository.save(person);
     }
 
     /**
@@ -66,7 +64,7 @@ public class PersonSaveService {
         resolveSpouses(expandedPerson.person());
         resolveParents(expandedPerson.person());
         resolveChildren(expandedPerson.person(), expandedPerson.childRelationships());
-
+        resolveCountry(expandedPerson.person());
         expandedPerson.person().setRelationshipsExpanded(true);
         return new ExpandedPerson(personRepository.save(expandedPerson.person()), expandedPerson.childRelationships());
     }
@@ -88,26 +86,11 @@ public class PersonSaveService {
             if (country.getWikidataId() == null || country.getWikidataId().isBlank()) {
                 throw new IllegalArgumentException("Country Wikidata ID is required");
             }
-
-            Optional<Country> existingCountry = countryRepository.findByWikidataId(country.getWikidataId());
-
-            if (existingCountry.isPresent()) {
-                person.setBornIn(existingCountry.get());
-                return;
-            }
             if (country.getName() == null || country.getName().isBlank()) {
                 throw new IllegalArgumentException("Country name is required");
             }
-            Country newCountry = new Country(null, country.getWikidataId(), country.getName());
-            try {
-                person.setBornIn(countryRepository.save(newCountry));
-            } catch (DataIntegrityViolationException e) {
-                person.setBornIn(countryRepository.findByWikidataId(country.getWikidataId()).orElseThrow());
-            }
-
+            person.setBornIn(countryRepository.mergeByWikidataId(country.getWikidataId(), country.getName()));
         }
-
-
     }
 
     /**
