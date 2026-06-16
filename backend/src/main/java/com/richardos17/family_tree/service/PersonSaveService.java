@@ -45,6 +45,8 @@ public class PersonSaveService {
              personRepository.findByWikidataId(person.getWikidataId())
                      .ifPresent(existing -> person.setLocalId(existing.getLocalId()));
          }
+         resolveParents(person);
+         resolveSpouses(person);
 
         return personRepository.save(person);
     }
@@ -99,6 +101,10 @@ public class PersonSaveService {
             }
             if (country.getName() == null || country.getName().isBlank()) {
                 throw new IllegalArgumentException("Country name is required");
+            }
+            if (countryRepository.existsByWikidataId(country.getWikidataId())) {
+                person.setBornIn(countryRepository.getCountryByWikidataId(country.getWikidataId()));
+                return;
             }
             person.setBornIn(countryRepository.mergeByWikidataId(country.getWikidataId(), country.getName()));
         }
