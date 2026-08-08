@@ -81,6 +81,7 @@ public class PersonRelationshipRepository {
 
     private Person mapPerson(org.neo4j.driver.types.Node node) {
         return Person.builder()
+                .localId(node.get("localId").asString(null))
                 .wikidataId(node.get("wikidataId").asString(null))
                 .name(node.get("name").asString(null))
                 .birthdate(node.get("birthdate").isNull() ? null :
@@ -89,7 +90,7 @@ public class PersonRelationshipRepository {
                         node.get("deathdate").asLocalDate())
                 .wikipediaLink(node.get("wikipediaLink").asString(null))
                 .imageLink(node.get("imageLink").asString(null))
-                .relationshipsExpanded(node.get("relationship_expanded").asBoolean(false))
+                .relationshipsExpanded(node.get("relationships_expanded").asBoolean(false))
 
                 .build();
     }

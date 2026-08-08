@@ -1,5 +1,6 @@
 package com.richardos17.family_tree.repository;
 
+import com.richardos17.family_tree.domain.FamilyRelationshipDTO;
 import com.richardos17.family_tree.domain.Person;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -37,21 +38,6 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
     """)
     Optional<Person> findByWikidataId(String id);
 
-    @Query("""
-            MATCH (p:Person {wikidataId: $id})
-
-            OPTIONAL MATCH (p)-[rP:HAS_PARENT]->(parent)
-            OPTIONAL MATCH (country)-[rB:BORN_IN]-(p)
-            OPTIONAL MATCH (spouse)-[rM:MARRIED_TO]-(p)
-
-            RETURN p,
-                   collect(DISTINCT rP),
-                   collect(DISTINCT parent),
-                   collect(DISTINCT rM),
-                   collect(DISTINCT spouse),
-                   collect(DISTINCT country)
-    """)
-    Optional<Person> findFullByWikidataId(String id);
 
     @Query("""
             MATCH (p:Person)
@@ -63,4 +49,27 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
                    collect(DISTINCT country)
     """)
     List<Person> searchByName(String name);
+
+    @Query("""
+    MATCH (parent:Person {localId: $parentLocalId})
+    MATCH (child:Person {localId: $childLocalId})
+    MERGE (child)-[:HAS_PARENT]->(parent)
+    """)
+    void createParentRelationship(String parentLocalId, String childLocalId);
+
+    @Query("""
+    MATCH (parent:Person)-[r:HAS_PARENT]->(child:Person)
+    WHERE child.localId = $childId
+    RETURN parent.localId AS parentId,
+           child.localId AS childId""")
+    List<FamilyRelationshipDTO> findParents(String childId);
+
+    @Query("""
+    MATCH (parent:Person)-[r:HAS_PARENT]->(child:Person)
+    WHERE parent.localId = $parentId
+    RETURN parent.localId AS parentId,
+           child.localId AS childId""")
+    List<FamilyRelationshipDTO> findChildren(String parentId);
+
+
 }

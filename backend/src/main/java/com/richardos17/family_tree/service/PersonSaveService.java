@@ -1,12 +1,10 @@
 package com.richardos17.family_tree.service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 import com.richardos17.family_tree.domain.ExpandedPerson;
-import com.richardos17.family_tree.domain.FamilyRelationship;
-import com.richardos17.family_tree.domain.MarriedTo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,13 +38,17 @@ public class PersonSaveService {
             throw new IllegalArgumentException("Person Wikidata ID is required");
         }
         resolveCountry(person);
-        person.setRelationshipsExpanded(false);
-         if (person.getLocalId() == null) {
-             personRepository.findByWikidataId(person.getWikidataId())
-                     .ifPresent(existing -> person.setLocalId(existing.getLocalId()));
-         }
-         resolveParents(person);
-         resolveSpouses(person);
+        personRepository.findByWikidataId(person.getWikidataId())
+                .ifPresent(existing -> {
+                    if (person.getLocalId() != null && !person.getLocalId().equals(existing.getLocalId())) {
+                        throw new IllegalArgumentException("Person with the same wikidataId already exists with a different localId");
+                    }
+                    person.setLocalId(existing.getLocalId());
+
+                    if (existing.getRelationshipsExpanded()) {
+                        person.setRelationshipsExpanded(true);
+                    }
+                });
 
         return personRepository.save(person);
     }
@@ -59,27 +61,38 @@ public class PersonSaveService {
      * @return The saved expanded person entity with valid localId and all entities with valid localId.
      * @throws IllegalArgumentException If the expanded person, person, or person's wikidataId is null or blank.
      */
-    public ExpandedPerson saveExpandedPerson(ExpandedPerson expandedPerson) {
+    public void saveExpandedPerson(ExpandedPerson expandedPerson) {
         if (expandedPerson == null) {
             throw new IllegalArgumentException("Expanded person is null");
         }
+        if (expandedPerson.spouses() == null) {
+            throw new IllegalArgumentException("Spouses are required");
+        }
+        if (expandedPerson.parentRelationships() == null) {
+            throw new IllegalArgumentException("Parents are required");
+        }
+        if (expandedPerson.childRelationships() == null) {
+            throw new IllegalArgumentException("Children are required");
+        }
         if (expandedPerson.person() == null) {
-            throw new IllegalArgumentException("Person is null");
+            throw new IllegalArgumentException("Person is required");
         }
-        if (expandedPerson.person().getWikidataId() == null || expandedPerson.person().getWikidataId().isBlank()) {
-            throw new IllegalArgumentException("Person Wikidata ID is required");
-        }
-        resolveSpouses(expandedPerson.person());
-        resolveParents(expandedPerson.person());
-        resolveChildren(expandedPerson.person(), expandedPerson.childRelationships());
-        resolveCountry(expandedPerson.person());
         expandedPerson.person().setRelationshipsExpanded(true);
-        if (expandedPerson.person().getLocalId() == null) {
-            personRepository.findByWikidataId(expandedPerson.person().getWikidataId())
-                    .ifPresent(existing -> expandedPerson.person().setLocalId(existing.getLocalId()));
-        }
+        Person savedPerson = savePerson(expandedPerson.person());
+        //TODO optimize by saving in bulk all persons and relationships
+        expandedPerson.spouses().forEach(marriedTo -> savePerson(marriedTo.getSpouse()));
 
-        return new ExpandedPerson(personRepository.save(expandedPerson.person()), expandedPerson.childRelationships());
+        List<String> parentIds = new ArrayList<>();
+        expandedPerson.parentRelationships().forEach(familyRelationship ->
+                parentIds.add(savePerson(familyRelationship.getEntity()).getLocalId()));
+
+        List<String> childIds = new ArrayList<>();
+        expandedPerson.childRelationships().forEach(familyRelationship ->
+                childIds.add(savePerson(familyRelationship.getEntity()).getLocalId()));
+
+        parentIds.forEach(parentId -> personRepository.createParentRelationship(parentId, savedPerson.getLocalId()));
+        childIds.forEach(childId -> personRepository.createParentRelationship(savedPerson.getLocalId(), childId));
+
     }
 
     /**
@@ -107,84 +120,6 @@ public class PersonSaveService {
                 return;
             }
             person.setBornIn(countryRepository.mergeByWikidataId(country.getWikidataId(), country.getName()));
-        }
-    }
-
-    /**
-     * If a person's spouses are not already in the database, they will be added. If they are already in the database,
-     * they will be retrieved from the database. And their actual entities will be retrieved and the person gets entities with valid localId.
-     * @param person The person entity to resolve spouses for.
-     * @throws IllegalArgumentException If a spouse is missing or has a null or blank Wikidata ID.
-     */
-    private void resolveSpouses(Person person) {
-        if (person.getSpouses() != null) {
-            for (MarriedTo marriedTo : person.getSpouses()) {
-                if (marriedTo.getSpouse() == null) {
-                    throw new IllegalArgumentException("Spouse is required");
-                }
-                if (marriedTo.getSpouse().getWikidataId() == null || marriedTo.getSpouse().getWikidataId().isBlank()) {
-                    throw new IllegalArgumentException("Spouse Wikidata ID is required");
-                }
-                Optional<Person> spouseOptional = personRepository.findByWikidataId(marriedTo.getSpouse().getWikidataId());
-                if (spouseOptional.isPresent()) {
-                    marriedTo.setSpouse(spouseOptional.get());
-                } else {
-                    marriedTo.setSpouse(savePerson(marriedTo.getSpouse()));
-                }
-            }
-        }
-    }
-    /**
-     * If a person's parents are not already in the database, they will be added. If they are already in the database,
-     * they will be retrieved from the database. And their actual entities will be retrieved and the person gets entities with valid localId.
-     * @param person The person entity to resolve parents for.
-     * @throws IllegalArgumentException If a parent is missing or has a null or blank Wikidata ID.
-     */
-    private void resolveParents(Person person) {
-        if (person.getParents() != null) {
-            for (FamilyRelationship parentRelationship : person.getParents()) {
-                if (parentRelationship.getEntity() == null) {
-                    throw new IllegalArgumentException("Parent is required");
-                }
-                if (parentRelationship.getEntity().getWikidataId() == null || parentRelationship.getEntity().getWikidataId().isBlank()) {
-                    throw new IllegalArgumentException("Parent Wikidata ID is required");
-                }
-                Optional<Person> parentOptional = personRepository.findByWikidataId(parentRelationship.getEntity().getWikidataId());
-                if (parentOptional.isPresent()) {
-                    parentRelationship.setEntity(parentOptional.get());
-                } else {
-                    parentRelationship.setEntity(savePerson(parentRelationship.getEntity()));
-                }
-            }
-        }
-    }
-
-    /**
-     * If a person's child is not already in the database, it will be added with the expanded person set as a parent. If it is already in the database, it will be retrieved from the database,
-     * parent is set, and it will be saved back to the database.
-     * And its actual entity will be retrieved, and the person gets the entity with valid localId of child.
-     * @param parent The parent person entity to resolve children for.
-     * @param childRelationships The list of child relationships to resolve.
-     * @throws IllegalArgumentException If a child is missing or has a null or blank Wikidata ID.
-     */
-    private void resolveChildren(Person parent, List<FamilyRelationship> childRelationships) {
-        if (childRelationships != null) {
-            for (FamilyRelationship childRelationship : childRelationships) {
-                if (childRelationship.getEntity() == null) {
-                    throw new IllegalArgumentException("Child is required");
-                }
-                if (childRelationship.getEntity().getWikidataId() == null || childRelationship.getEntity().getWikidataId().isBlank()) {
-                    throw new IllegalArgumentException("Child Wikidata ID is required");
-                }
-                Optional<Person> childOptional = personRepository.findByWikidataId(childRelationship.getEntity().getWikidataId());
-                if (childOptional.isPresent()) {
-                    childOptional.get().addParent(parent);
-                    childRelationship.setEntity(savePerson(childOptional.get()));
-                } else {
-                    childRelationship.getEntity().addParent(parent);
-                    childRelationship.setEntity(savePerson(childRelationship.getEntity()));
-                }
-            }
         }
     }
 }

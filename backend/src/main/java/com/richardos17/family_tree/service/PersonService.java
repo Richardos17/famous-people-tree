@@ -26,8 +26,6 @@ public class PersonService {
     private final FetchPerson fetchPerson;
     private final PersonSaveService personSaveService;
     private final PersonMapper personMapper;
-//    private final FamilyRelationshipMapper familyRelationshipMapper;
-//    private final MarriedToMapper marriedToMapper;
     private final PersonRelationshipRepository personRelationshipRepository;
 
     /**
@@ -51,11 +49,10 @@ public class PersonService {
             return personsDb;
         }
         return fetchPerson.fetchPersonsByName(name).stream()
-                .map(person -> personRepository.findByWikidataId(person.getWikidataId())
-                        .orElseGet(() -> {
+                .map(person -> {
                             person.setRelationshipsExpanded(false);
                             return personSaveService.savePerson(person);
-                        }))
+                        })
                 .toList();
     }
 
@@ -113,72 +110,52 @@ public class PersonService {
 
     private Optional<PersonTreeResponseDTO> buildSimplePersonTree(String wikidataId, int depth) {
 
-        Optional<Person> personOptional = personRepository.findByWikidataId(wikidataId);
-        Optional<List<FamilyRelationship>> childrenOptional = Optional.empty();
+        Optional<Person> personOptional = getPersonByWikidataId(wikidataId);
 
-        if (personOptional.isEmpty() || !personOptional.get().getRelationshipsExpanded()) {
-            ExpandedPerson fullPerson = fetchPerson.fetchFullPersonByWikidataId(wikidataId);
-            if (fullPerson.person() == null) {
-                return Optional.empty();
-            }
-            fullPerson.person().setRelationshipsExpanded(true);
-            ExpandedPerson savedExpandedPerson = personSaveService.saveExpandedPerson(fullPerson);
-            personOptional = Optional.of(savedExpandedPerson.person());
-            childrenOptional = Optional.of(savedExpandedPerson.childRelationships());
-        } else {
-            personOptional.get().setSpouses(personRelationshipRepository.findSpousesByPersonId(wikidataId));
+        if (personOptional.isEmpty()) {
+            return Optional.empty();
         }
         Person person = personOptional.get();
         Set<RelationshipDTO> relationshipDTOS = new HashSet<>();
         Set<PersonDTO> persons = new HashSet<>();
 
-        List<MarriedTo> spouses = person.getSpouses() != null ? person.getSpouses() : List.of();
+        List<MarriedTo> spouses;
+        if (person.getRelationshipsExpanded()) {
+            spouses = personRelationshipRepository.findSpousesByPersonId(person.getWikidataId());
+        }
+        else {
+            spouses = List.of(); //TODO ziskat spouse z fetchu
+        }
         spouses.forEach(married -> relationshipDTOS.add(new MarriageDTO(
                 person.getWikidataId(), married.getSpouse().getWikidataId(), married.getStartDate(), married.getEndDate())));
         persons.addAll(spouses.stream().map(married -> personMapper.toDTO(married.getSpouse())).toList());
-
-        if (depth == 1) {
-            persons.add(personMapper.toDTO(person));
-
-            List<FamilyRelationship> directParents = person.getParents() != null
-                    ? person.getParents()
-                    : personRelationshipRepository.findParentsByChildId(wikidataId);
-            directParents.forEach(parentRel -> {
-                relationshipDTOS.add(new ParentRelationshipDTO(wikidataId, parentRel.getEntity().getWikidataId()));
-                persons.add(personMapper.toDTO(parentRel.getEntity()));
-            });
-
-            List<FamilyRelationship> directChildren = childrenOptional
-                    .orElseGet(() -> personRelationshipRepository.findChildrenByParentId(wikidataId));
-            directChildren.forEach(childRel -> {
-                relationshipDTOS.add(new ParentRelationshipDTO(childRel.getEntity().getWikidataId(), wikidataId));
-                persons.add(personMapper.toDTO(childRel.getEntity()));
-            });
-        } else {
-            traverseUpwards(person, depth, persons, relationshipDTOS);
-            traverseDownwards(person, depth, persons, relationshipDTOS);
-        }
-
+            Set<PersonDTO> personsUp = new HashSet<>();
+            Set<PersonDTO> personsDown = new HashSet<>();
+            traverseUpwards(person, depth, personsUp, relationshipDTOS);
+            traverseDownwards(person, depth, personsDown, relationshipDTOS);
+            persons.addAll(personsUp);
+            persons.addAll(personsDown);
         return Optional.of(new PersonTreeResponseDTO(persons, relationshipDTOS));
     }
 
     private void traverseUpwards(Person person, int depth, Set<PersonDTO> visited, Set<RelationshipDTO> relationships) {
+        if (!visited.add(personMapper.toDTO(person))) { //TODO maybe change to set of ids, for faster look up
+            return;
+        }
         if (depth == 0) {
-            visited.add(personMapper.toDTO(person));
             return;
         }
-        if (visited.stream().anyMatch(dto -> dto.getWikidataId().equals(person.getWikidataId()))) {
-            return;
-        }
-        visited.add(personMapper.toDTO(person));
 
         List<FamilyRelationship> parents;
-        if (person.getRelationshipsExpanded() == null || !person.getRelationshipsExpanded()) {
-            ExpandedPerson expandedPerson = fetchPerson.fetchFullPersonByWikidataId(person.getWikidataId());
-            personSaveService.saveExpandedPerson(expandedPerson);
-            parents = expandedPerson.person().getParents() != null ? expandedPerson.person().getParents() : List.of();
-        } else {
+        if (person.getRelationshipsExpanded()) {
             parents = personRelationshipRepository.findParentsByChildId(person.getWikidataId());
+
+        } else {
+            //TODO change to fetch just parents
+            ExpandedPerson expandedPerson = fetchPerson.fetchFullPersonByWikidataId(person.getWikidataId());
+            parents = expandedPerson.parentRelationships();
+            parents.forEach(parentRelationship -> parentRelationship.setEntity(personSaveService.savePerson(parentRelationship.getEntity())));
+
         }
         parents.forEach(parentRel -> {
             relationships.add(new ParentRelationshipDTO(person.getWikidataId(), parentRel.getEntity().getWikidataId()));
@@ -187,22 +164,22 @@ public class PersonService {
     }
 
     private void traverseDownwards(Person person, int depth, Set<PersonDTO> visited, Set<RelationshipDTO> relationships) {
+        if (!visited.add(personMapper.toDTO(person))) {
+            return;
+        }
         if (depth == 0) {
-            visited.add(personMapper.toDTO(person));
             return;
         }
-        if (visited.stream().anyMatch(dto -> dto.getWikidataId().equals(person.getWikidataId()))) {
-            return;
-        }
-        visited.add(personMapper.toDTO(person));
+
 
         List<FamilyRelationship> children;
-        if (person.getRelationshipsExpanded() == null || !person.getRelationshipsExpanded()) {
-            ExpandedPerson expandedPerson = fetchPerson.fetchFullPersonByWikidataId(person.getWikidataId());
-            personSaveService.saveExpandedPerson(expandedPerson);
-            children = expandedPerson.childRelationships() != null ? expandedPerson.childRelationships() : List.of();
-        } else {
+        if (person.getRelationshipsExpanded()) {
             children = personRelationshipRepository.findChildrenByParentId(person.getWikidataId());
+        } else {
+            //TODO change to fetch just children
+            ExpandedPerson expandedPerson = fetchPerson.fetchFullPersonByWikidataId(person.getWikidataId());
+            children = expandedPerson.childRelationships();
+            children.forEach(childRelationship -> childRelationship.setEntity(personSaveService.savePerson(childRelationship.getEntity())));
         }
         children.forEach(childRel -> {
             relationships.add(new ParentRelationshipDTO(childRel.getEntity().getWikidataId(), person.getWikidataId()));
