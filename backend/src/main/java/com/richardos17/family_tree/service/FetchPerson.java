@@ -2,7 +2,6 @@ package com.richardos17.family_tree.service;
 
 import com.richardos17.family_tree.utils.WikidataLocalDateDeserializer;
 import com.richardos17.family_tree.domain.Country;
-import com.richardos17.family_tree.domain.ExpandedPerson;
 import com.richardos17.family_tree.domain.FamilyRelationship;
 import com.richardos17.family_tree.domain.MarriedTo;
 import com.richardos17.family_tree.domain.Person;
@@ -22,7 +21,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -135,7 +136,7 @@ public class FetchPerson {
 
         JsonNode results = fetchData(sparql);
         if (results.isEmpty()) {
-            throw new IllegalArgumentException("No person found for Wikidata ID: " + wikidataId);
+            throw new NoSuchElementException("No person found for Wikidata ID: " + wikidataId);
         }
         return buildPersonFromProperties(results.get(0));
     }
@@ -145,21 +146,142 @@ public class FetchPerson {
      * @param wikidataId The Wikidata ID of exisiting person.
      * @return The ExpandedPerson object containing the full information about the person and its relatives.
      */
-    public ExpandedPerson fetchFullPersonByWikidataId(String wikidataId) {
+//    public ExpandedPerson fetchFullPersonByWikidataId(String wikidataId) {
+//        if (wikidataId == null || wikidataId.isBlank()) {
+//            throw new IllegalArgumentException("Wikidata ID cannot be null or empty");
+//        }
+//        JsonNode row = fetchData(buildFullPersonSparql(wikidataId)).get(0);
+//        if (row == null) {
+//            throw new IllegalArgumentException("No data found for Wikidata ID: " + wikidataId);
+//        }
+//        Person person = buildPersonFromProperties(row);
+//        person.setRelationshipsExpanded(true);
+//
+//        Map<String, List<Relative>> relatives = parseRelatives(row);
+//        List<Person> relativePersons = fetchRelativePersons(relatives);
+//
+//        return assembleExpandedPerson(person, relatives, relativePersons);
+//    }
+
+    public List<MarriedTo> fetchSpousesByWikidataId(String wikidataId) {
         if (wikidataId == null || wikidataId.isBlank()) {
             throw new IllegalArgumentException("Wikidata ID cannot be null or empty");
         }
-        JsonNode row = fetchData(buildFullPersonSparql(wikidataId)).get(0);
+        JsonNode row = fetchData(buildSpouses(wikidataId)).get(0);
         if (row == null) {
             throw new IllegalArgumentException("No data found for Wikidata ID: " + wikidataId);
         }
-        Person person = buildPersonFromProperties(row);
-        person.setRelationshipsExpanded(true);
+        List<Relative> relatives = parseRelativeList(row, "spouses");
+        List<Person> relativePersons = fetchRelativePersons( relatives);
 
-        Map<String, List<Relative>> relatives = parseRelatives(row);
-        List<Person> relativePersons = fetchRelativePersons(relatives);
+        return relatives.stream()
+                .map(r -> new MarriedTo(null, findExactlyOne(relativePersons, r.id), r.start, r.end))
+                .toList();
+    }
+    public List<FamilyRelationship> fetchParentsByWikidataId(String wikidataId) {
+        if (wikidataId == null || wikidataId.isBlank()) {
+            throw new IllegalArgumentException("Wikidata ID cannot be null or empty");
+        }
+        JsonNode row = fetchData(buildParents(wikidataId)).get(0);
+        if (row == null) {
+            throw new IllegalArgumentException("No data found for Wikidata ID: " + wikidataId);
+        }
+        List<Relative> relatives = parseRelativeList(row, "parents");
+        List<Person> relativePersons = fetchRelativePersons( relatives);
 
-        return assembleExpandedPerson(person, relatives, relativePersons);
+        return relatives.stream()
+                .map(r -> new FamilyRelationship(null, findExactlyOne(relativePersons, r.id)))
+                .toList();
+    }
+    public List<FamilyRelationship> fetchChildrenByWikidataId(String wikidataId) {
+        if (wikidataId == null || wikidataId.isBlank()) {
+            throw new IllegalArgumentException("Wikidata ID cannot be null or empty");
+        }
+        JsonNode row = fetchData(buildChildren(wikidataId)).get(0);
+        if (row == null) {
+            throw new IllegalArgumentException("No data found for Wikidata ID: " + wikidataId);
+        }
+        List<Relative> relatives = parseRelativeList(row, "children");
+        List<Person> relativePersons = fetchRelativePersons( relatives);
+
+        return relatives.stream()
+                .map(r -> new FamilyRelationship(null, findExactlyOne(relativePersons, r.id)))
+                .toList();
+    }
+
+    private String buildSpouses(String wikidataId) {
+        return String.format("""
+                SELECT
+                    (GROUP_CONCAT(DISTINCT ?spouseJson; separator=",") AS ?spouses)
+                WHERE {
+                    BIND(wd:%s AS ?person)
+
+                    # ---------------- SPOUSES ----------------
+                    OPTIONAL {
+                        ?person p:P26 ?s .
+                        ?s ps:P26 ?spouse .
+                        OPTIONAL { ?s pq:P580 ?startTime }
+                        OPTIONAL { ?s pq:P582 ?endTime }
+                        BIND(CONCAT(
+                            '{"id":"',    REPLACE(STR(?spouse), "http://www.wikidata.org/entity/", ""),
+                            '","start":"', COALESCE(STR(?startTime), ""),
+                            '","end":"',   COALESCE(STR(?endTime), ""), '"}'
+                        ) AS ?spouseJson)
+                    }
+
+                    SERVICE wikibase:label {
+                        bd:serviceParam wikibase:language "en" .
+                        ?person      rdfs:label ?personLabel .
+                    }
+                }
+                """, wikidataId);
+    }
+
+    private String buildParents(String wikidataId) {
+        return String.format("""
+                SELECT (GROUP_CONCAT(DISTINCT ?parentId; separator=",") AS ?parents)
+                    WHERE {
+                    BIND(wd:%s AS ?person)
+            
+                    {
+                        ?person wdt:P22 ?parent .
+                        BIND(REPLACE(STR(?parent),
+                            "http://www.wikidata.org/entity/", "") AS ?parentId)
+                    }
+                    UNION
+                    {
+                        ?person wdt:P25 ?parent .
+                        BIND(REPLACE(STR(?parent),
+                            "http://www.wikidata.org/entity/", "") AS ?parentId)
+                    }
+            
+            
+                    SERVICE wikibase:label {
+                        bd:serviceParam wikibase:language "en" .
+                        ?person      rdfs:label ?personLabel .
+                    }
+                }
+                """, wikidataId);
+    }
+    private String buildChildren(String wikidataId) {
+        return String.format("""
+                SELECT
+                    (GROUP_CONCAT(DISTINCT ?childJson;  separator=",") AS ?children)
+                    WHERE {
+                    BIND(wd:%s AS ?person)
+
+                    # ---------------- CHILDREN ----------------
+                    OPTIONAL {
+                        ?person wdt:P40 ?child .
+                        BIND(CONCAT('{"id":"', REPLACE(STR(?child), "http://www.wikidata.org/entity/", ""), '"}') AS ?childJson)
+                    }
+
+                    SERVICE wikibase:label {
+                        bd:serviceParam wikibase:language "en" .
+                        ?person      rdfs:label ?personLabel .
+                    }
+                }
+                """, wikidataId);
     }
 
     private String buildFullPersonSparql(String wikidataId) {
@@ -238,7 +360,6 @@ public class FetchPerson {
         relatives.put("spouses",  parseRelativeList(row, "spouses"));
         return relatives;
     }
-
     private List<Relative> parseRelativeList(JsonNode row, String field) {
         String raw = row.path(field).path("value").asString();
         String json = "[" + (raw != null ? raw : "") + "]";
@@ -289,6 +410,47 @@ public class FetchPerson {
 
         return fetchData(sparql).valueStream().map(this::buildPersonFromProperties).toList();
     }
+    private List<Person> fetchRelativePersons(List<Relative> relatives) {
+        String relativeIds = relatives.stream()
+                .map(r -> "wd:" + r.id)
+                .distinct()
+                .collect(Collectors.joining(" "));
+
+        if (relativeIds.isBlank()) {
+            return List.of();
+        }
+
+        String sparql = String.format("""
+                SELECT
+                    ?person ?personLabel ?birthDate ?deathDate ?image ?height ?wikipedia ?birthCountry ?birthCountryLabel
+                WHERE {
+                    VALUES ?person { %s }
+
+                    OPTIONAL { ?person wdt:P569 ?birthDate }
+                    OPTIONAL { ?person wdt:P570 ?deathDate }
+                    OPTIONAL { ?person wdt:P18  ?image }
+                    OPTIONAL { ?person wdt:P2048 ?height }
+
+                    OPTIONAL {
+                        ?person wdt:P19 ?birthPlace .
+                        ?birthPlace wdt:P17 ?birthCountry .
+                    }
+
+                    OPTIONAL {
+                        ?article <http://schema.org/about> ?person ;
+                                 <http://schema.org/isPartOf> <https://en.wikipedia.org/> .
+                        BIND(?article AS ?wikipedia)
+                    }
+
+                    SERVICE wikibase:label {
+                        bd:serviceParam wikibase:language "en" .
+                        ?person       rdfs:label ?personLabel .
+                        ?birthCountry rdfs:label ?birthCountryLabel .
+                    }
+                }
+                """, relativeIds);
+        return fetchData(sparql).valueStream().map(this::buildPersonFromProperties).toList();
+    }
 
     private Person findExactlyOne(List<Person> persons, String wikidataId) {
         List<Person> matches = persons.stream()
@@ -300,28 +462,28 @@ public class FetchPerson {
         return matches.get(0);
     }
 
-    private ExpandedPerson assembleExpandedPerson(Person person, Map<String, List<Relative>> relatives, List<Person> relativePersons) {
-        if (person == null) {
-            throw new IllegalArgumentException("Person cannot be null");
-        }
-
-        List<FamilyRelationship> children = relatives.get("children").stream()
-                .map(r -> new FamilyRelationship(null, findExactlyOne(relativePersons, r.id)))
-                .toList();
-
-        relatives.get("father").stream().findFirst()
-                .ifPresent(r -> person.addParent(findExactlyOne(relativePersons, r.id)));
-
-        relatives.get("mother").stream().findFirst()
-                .ifPresent(r -> person.addParent(findExactlyOne(relativePersons, r.id)));
-
-        List<MarriedTo> spouses = relatives.get("spouses").stream()
-                .map(r -> new MarriedTo(null, findExactlyOne(relativePersons, r.id), r.start, r.end))
-                .toList();
-        person.setSpouses(spouses);
-
-        return new ExpandedPerson(person, children);
-    }
+//    private ExpandedPerson assembleExpandedPerson(Person person, Map<String, List<Relative>> relatives, List<Person> relativePersons) {
+//        if (person == null) {
+//            throw new IllegalArgumentException("Person cannot be null");
+//        }
+//
+//        List<FamilyRelationship> children = relatives.get("children").stream()
+//                .map(r -> new FamilyRelationship(null, findExactlyOne(relativePersons, r.id)))
+//                .toList();
+//
+//        relatives.get("father").stream().findFirst()
+//                .ifPresent(r -> person.addParent(findExactlyOne(relativePersons, r.id)));
+//
+//        relatives.get("mother").stream().findFirst()
+//                .ifPresent(r -> person.addParent(findExactlyOne(relativePersons, r.id)));
+//
+//        List<MarriedTo> spouses = relatives.get("spouses").stream()
+//                .map(r -> new MarriedTo(null, findExactlyOne(relativePersons, r.id), r.start, r.end))
+//                .toList();
+//        person.setSpouses(spouses);
+//
+//        return new ExpandedPerson(person, children);
+//    }
 
     private Person buildPersonFromProperties(JsonNode properties) {
         String personUrl = properties.path("person").path("value").asString();
@@ -337,11 +499,11 @@ public class FetchPerson {
 
         return Person.builder()
                 .name(properties.path("personLabel").path("value").asString())
-                .birthdate(parseWikidataDate(properties.path("birthDate").path("value").asString()))
-                .deathdate(parseWikidataDate(properties.path("deathDate").path("value").asString()))
-                .wikipediaLink(properties.path("wikipedia").path("value").asString())
+                .birthdate(parseWikidataDate(properties.path("birthDate").path("value").asString(null)))
+                .deathdate(parseWikidataDate(properties.path("deathDate").path("value").asString(null)))
+                .wikipediaLink(properties.path("wikipedia").path("value").asString(null))
                 .wikidataId(getWikidataIdFromUrl(personUrl))
-                .imageLink(properties.path("image").path("value").asString())
+                .imageLink(properties.path("image").path("value").asString(null))
                 .bornIn(country)
                 .build();
     }

@@ -1,9 +1,6 @@
 package com.richardos17.family_tree.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Property;
@@ -14,10 +11,8 @@ import java.time.LocalDate;
 
 
 @RelationshipProperties
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Getter
-@Setter
 public class MarriedTo {
     @Id
     @GeneratedValue

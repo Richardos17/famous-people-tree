@@ -1,10 +1,12 @@
 package com.richardos17.family_tree.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 
 import com.richardos17.family_tree.domain.ExpandedPerson;
+import com.richardos17.family_tree.domain.FamilyRelationship;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +96,19 @@ public class PersonSaveService {
         childIds.forEach(childId -> personRepository.createParentRelationship(savedPerson.getLocalId(), childId));
 
     }
+    public void saveFamilyRelationship(String parentLocalId, String childLocalId) {
+        if (parentLocalId == null || parentLocalId.isBlank() || childLocalId == null || childLocalId.isBlank()) {
+            throw new IllegalArgumentException("Parent and child localIds are required");
+        }
+        personRepository.createParentRelationship(parentLocalId, childLocalId);
+    }
+    public void saveMarriedRelationship(String spouse1LocalId, String spouse2LocalId, LocalDate startDate, LocalDate endDate) {
+        if (spouse1LocalId == null || spouse1LocalId.isBlank() || spouse2LocalId == null || spouse2LocalId.isBlank()) {
+            throw new IllegalArgumentException("Spouses localIds are required");
+        }
+        personRepository.createMarriageRelationship(spouse1LocalId, spouse2LocalId, startDate, endDate);
+    }
+
 
     /**
      * Resolves the country associated with the given person. If the person's country does not exist in the database,

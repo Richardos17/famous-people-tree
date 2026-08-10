@@ -55,7 +55,7 @@ public class PersonRelationshipRepository {
 
     public List<MarriedTo> findSpousesByPersonId(String wikidataId) {
         return neo4jClient.query("""
-                MATCH (spouse:Person)<-[r:MARRIED_TO]-(:Person {wikidataId: $wikidataId})
+                MATCH (spouse:Person)-[r:MARRIED_TO]-(:Person {wikidataId: $wikidataId})
                 OPTIONAL MATCH (spouse)-[:BORN_IN]-(country:Country)
                 RETURN spouse AS entity,
                        r.start_date AS startDate,

@@ -1,6 +1,8 @@
 package com.richardos17.family_tree.service;
 
 import com.richardos17.family_tree.domain.ExpandedPerson;
+import com.richardos17.family_tree.domain.FamilyRelationship;
+import com.richardos17.family_tree.domain.MarriedTo;
 import com.richardos17.family_tree.domain.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +54,7 @@ class FetchPersonTest {
     @BeforeEach
     void setUp() {
         when(wikidataWebClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(ArgumentMatchers.<Function<UriBuilder, URI>>any())).thenReturn(requestHeadersSpec);
+        when(requestHeadersUriSpec.uri((URI) any())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
     }
 
@@ -130,7 +133,7 @@ class FetchPersonTest {
                 .thenReturn(Mono.just("{\"results\":{\"bindings\":[]}}"));
 
         assertThatThrownBy(() -> fetchPerson.fetchPersonByWikidataId("Q99999999"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("No person found for Wikidata ID: Q99999999");
     }
 
@@ -165,67 +168,121 @@ class FetchPersonTest {
     // ── fetchFullPersonByWikidataId ───────────────────────────────────────────
 
     @Test
-    void fetchFullPersonByWikidataId_nullId_throwsIllegalArgumentException() {
-        assertThatThrownBy(() -> fetchPerson.fetchFullPersonByWikidataId(null))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void fetchFullPersonByWikidataId_noRelatives_returnsExpandedPersonWithRelationshipsExpanded() {
-        String response = """
+    void fetchChildrenByWikidataId() {
+        String firstResponse = """
                 {
                   "results": {
                     "bindings": [
                       {
-                        "person":      {"value": "http://www.wikidata.org/entity/Q937"},
-                        "personLabel": {"value": "Albert Einstein"},
-                        "birthDate":   {"value": "1879-03-14T00:00:00Z"}
+                         "children": {
+                                  "value": "{\\"id\\":\\"Q60197\\"},{\\"id\\":\\"Q7197\\"}"
+                                }
                       }
                     ]
                   }
                 }""";
-        when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just(response));
-
-        ExpandedPerson result = fetchPerson.fetchFullPersonByWikidataId("Q937");
-
-        assertThat(result.person().getWikidataId()).isEqualTo("Q937");
-        assertThat(result.person().getRelationshipsExpanded()).isTrue();
-        assertThat(result.childRelationships()).isEmpty();
-    }
-
-    @Test
-    void fetchFullPersonByWikidataId_withChildren_populatesChildRelationships() {
-        String mainResponse = """
-                {
-                  "results": {
-                    "bindings": [
-                      {
-                        "person":      {"value": "http://www.wikidata.org/entity/Q937"},
-                        "personLabel": {"value": "Albert Einstein"},
-                        "children":    {"value": "{\\"id\\":\\"Q60197\\"}"}
-                      }
-                    ]
-                  }
-                }""";
-        String relativesResponse = """
+        String secondReponse = """
                 {
                   "results": {
                     "bindings": [
                       {
                         "person":      {"value": "http://www.wikidata.org/entity/Q60197"},
                         "personLabel": {"value": "Hans Albert Einstein"}
+                      },
+                      {
+                        "person":      {"value": "http://www.wikidata.org/entity/Q7197"},
+                        "personLabel": {"value": "Martin Einstein"}
                       }
                     ]
                   }
                 }""";
         when(responseSpec.bodyToMono(String.class))
-                .thenReturn(Mono.just(mainResponse))
-                .thenReturn(Mono.just(relativesResponse));
+                .thenReturn(Mono.just(firstResponse))
+                .thenReturn(Mono.just(secondReponse));
 
-        ExpandedPerson result = fetchPerson.fetchFullPersonByWikidataId("Q937");
+        List<FamilyRelationship> result = fetchPerson.fetchChildrenByWikidataId("Q937");
 
-        assertThat(result.childRelationships()).hasSize(1);
-        assertThat(result.childRelationships().get(0).getEntity().getWikidataId()).isEqualTo("Q60197");
-        assertThat(result.childRelationships().get(0).getEntity().getName()).isEqualTo("Hans Albert Einstein");
+        assertThat(result).containsExactlyInAnyOrder(
+                new FamilyRelationship(null, Person.builder().wikidataId("Q60197").name("Hans Albert Einstein").build()),
+                new FamilyRelationship(null, Person.builder().wikidataId("Q7197").name("Martin Einstein").build()));
+    }
+    @Test
+    void fetchParentsByWikidataId() {
+        String firstResponse = """
+                {
+                  "results": {
+                    "bindings": [
+                      {
+                         "parents": {
+                                  "value": "{\\"id\\":\\"Q60197\\"},{\\"id\\":\\"Q7197\\"}"
+                                }
+                      }
+                    ]
+                  }
+                }""";
+        String secondReponse = """
+                {
+                  "results": {
+                    "bindings": [
+                      {
+                        "person":      {"value": "http://www.wikidata.org/entity/Q60197"},
+                        "personLabel": {"value": "Hans Albert Einstein"}
+                      },
+                      {
+                        "person":      {"value": "http://www.wikidata.org/entity/Q7197"},
+                        "personLabel": {"value": "Martin Einstein"}
+                      }
+                    ]
+                  }
+                }""";
+        when(responseSpec.bodyToMono(String.class))
+                .thenReturn(Mono.just(firstResponse))
+                .thenReturn(Mono.just(secondReponse));
+
+        List<FamilyRelationship> result = fetchPerson.fetchParentsByWikidataId("Q937");
+
+        assertThat(result).containsExactlyInAnyOrder(
+                new FamilyRelationship(null, Person.builder().wikidataId("Q60197").name("Hans Albert Einstein").build()),
+                new FamilyRelationship(null, Person.builder().wikidataId("Q7197").name("Martin Einstein").build()));
+    }
+    @Test
+    void fetchSpousesByWikidataId() {
+        String firstResponse = """
+                {
+                  "results": {
+                    "bindings": [
+                      {
+                         "spouses": {
+                                  "value": "{\\"id\\":\\"Q60197\\"},{\\"id\\":\\"Q7197\\", \\"start\\":\\"2000-01-05T00:00:00Z\\",\\"end\\":\\"2005-04-07T00:00:00Z\\"}"
+                                }
+                      }
+                    ]
+                  }
+                }""";
+        String secondReponse = """
+                {
+                  "results": {
+                    "bindings": [
+                      {
+                        "person":      {"value": "http://www.wikidata.org/entity/Q60197"},
+                        "personLabel": {"value": "Hans Albert Einstein"}
+                      },
+                      {
+                        "person":      {"value": "http://www.wikidata.org/entity/Q7197"},
+                        "personLabel": {"value": "Martin Einstein"}
+                      }
+                    ]
+                  }
+                }""";
+        when(responseSpec.bodyToMono(String.class))
+                .thenReturn(Mono.just(firstResponse))
+                .thenReturn(Mono.just(secondReponse));
+
+        List<MarriedTo> result = fetchPerson.fetchSpousesByWikidataId("Q937");
+
+        assertThat(result).containsExactlyInAnyOrder(
+                new MarriedTo(null, Person.builder().wikidataId("Q60197").name("Hans Albert Einstein").build(), null, null),
+                new MarriedTo(null, Person.builder().wikidataId("Q7197").name("Martin Einstein").build(),
+                LocalDate.of(2000, 1, 5), LocalDate.of(2005, 4, 7)));
     }
 }

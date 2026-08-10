@@ -157,9 +157,8 @@ class PersonSaveIntegrationTest {
         Person father = personSaveService.savePerson(
                 Person.builder().wikidataId("Q100").name("Hermann Einstein").build());
 
-        Person son = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        son.addParent(father);
-        personSaveService.savePerson(son);
+        Person son = personSaveService.savePerson(Person.builder().wikidataId("Q937").name("Albert Einstein").build());
+        personSaveService.saveFamilyRelationship(father.getLocalId(), son.getLocalId());
 
         List<FamilyRelationship> savedChildParents = personRelationshipRepository.findParentsByChildId("Q937");
         assertThat(savedChildParents).hasSize(1);
@@ -167,24 +166,7 @@ class PersonSaveIntegrationTest {
 
         List<FamilyRelationship> savedFatherChildren = personRelationshipRepository.findChildrenByParentId("Q100");
         assertThat(savedFatherChildren).hasSize(1);
-        assertThat(savedFatherChildren.getFirst().getEntity().getLocalId()).isEqualTo(son.getLocalId());
-    }
-
-    @Test
-    void savePerson_parentNotYetInDb_parentSavedAutomatically() {
-        Person father = Person.builder().wikidataId("Q100").name("Hermann Einstein").build();
-        Person son = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        son.addParent(father);
-
-        personSaveService.savePerson(son);
-
-        List<FamilyRelationship> savedChildParents = personRelationshipRepository.findParentsByChildId("Q937");
-        assertThat(savedChildParents).hasSize(1);
-        assertThat(savedChildParents.getFirst().getEntity()).isEqualTo(father);
-
-        List<FamilyRelationship> savedFatherChildren = personRelationshipRepository.findChildrenByParentId("Q100");
-        assertThat(savedFatherChildren).hasSize(1);
-        assertThat(savedFatherChildren.getFirst().getEntity().getLocalId()).isEqualTo(son.getLocalId());
+        assertThat(savedFatherChildren.getFirst().getEntity()).isEqualTo(son);
     }
 
     // ── PersonSaveService: idempotency ────────────────────────────────────────
@@ -195,81 +177,6 @@ class PersonSaveIntegrationTest {
         personSaveService.savePerson(Person.builder().wikidataId("Q937").name("Albert Einstein").build());
 
         assertThat(personRepository.count()).isEqualTo(1);
-    }
-
-    // ── PersonSaveService: expanded person ───────────────────────────────────
-
-    @Test
-    void savePersonExpanded_withParent_hasParentRelationshipPersisted() {
-        Person father = personSaveService.savePerson(
-                Person.builder().wikidataId("Q100").name("Hermann Einstein").build());
-
-        Person son = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        son.addParent(father);
-        ExpandedPerson expandedPerson = new ExpandedPerson(son, new ArrayList<>());
-        personSaveService.saveExpandedPerson(expandedPerson);
-
-        List<FamilyRelationship> savedChildParents = personRelationshipRepository.findParentsByChildId("Q937");
-        assertThat(savedChildParents).hasSize(1);
-        assertThat(savedChildParents.getFirst().getEntity()).isEqualTo(father);
-
-        List<FamilyRelationship> savedFatherChildren = personRelationshipRepository.findChildrenByParentId("Q100");
-        assertThat(savedFatherChildren).hasSize(1);
-        son.setParents(null);
-        assertThat(savedFatherChildren.getFirst().getEntity()).isEqualTo(son);
-    }
-
-    @Test
-    void savePersonExpanded_parentNotYetInDb_parentSavedAutomatically() {
-        Person father = Person.builder().wikidataId("Q100").name("Hermann Einstein").build();
-        Person son = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        son.addParent(father);
-        ExpandedPerson expandedPerson = new ExpandedPerson(son, new ArrayList<>());
-        personSaveService.saveExpandedPerson(expandedPerson);
-
-        List<FamilyRelationship> savedChildParents = personRelationshipRepository.findParentsByChildId("Q937");
-        assertThat(savedChildParents).hasSize(1);
-        assertThat(savedChildParents.getFirst().getEntity()).isEqualTo(father);
-
-        List<FamilyRelationship> savedFatherChildren = personRelationshipRepository.findChildrenByParentId("Q100");
-        assertThat(savedFatherChildren).hasSize(1);
-        son.setParents(null);
-        assertThat(savedFatherChildren.getFirst().getEntity()).isEqualTo(son);
-    }
-    @Test
-    void savePersonExpanded_withChild_hasChildRelationshipPersisted() {
-        Person son = personSaveService.savePerson(
-                Person.builder().wikidataId("Q100").name("Hermann Einstein").build());
-
-        Person father = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        ExpandedPerson expandedPerson = new ExpandedPerson(father, new ArrayList<>(List.of(new FamilyRelationship(null, son) )));
-        personSaveService.saveExpandedPerson(expandedPerson);
-
-        List<FamilyRelationship> savedChildParents = personRelationshipRepository.findParentsByChildId("Q100");
-        assertThat(savedChildParents).hasSize(1);
-        assertThat(savedChildParents.getFirst().getEntity()).isEqualTo(father);
-
-        List<FamilyRelationship> savedFatherChildren = personRelationshipRepository.findChildrenByParentId("Q937");
-        assertThat(savedFatherChildren).hasSize(1);
-        son.setParents(null);//already has null parents
-        assertThat(savedFatherChildren.getFirst().getEntity()).isEqualTo(son);
-    }
-
-    @Test
-    void savePersonExpanded_childNotYetInDb_childSavedAutomatically() {
-        Person son = Person.builder().wikidataId("Q100").name("Hermann Einstein").build();
-        Person father = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        ExpandedPerson expandedPerson = new ExpandedPerson(father, new ArrayList<>(List.of(new FamilyRelationship(null, son) )));
-        personSaveService.saveExpandedPerson(expandedPerson);
-
-        List<FamilyRelationship> savedChildParents = personRelationshipRepository.findParentsByChildId("Q100");
-        assertThat(savedChildParents).hasSize(1);
-        assertThat(savedChildParents.getFirst().getEntity()).isEqualTo(father);
-
-        List<FamilyRelationship> savedFatherChildren = personRelationshipRepository.findChildrenByParentId("Q937");
-        assertThat(savedFatherChildren).hasSize(1);
-        son.setParents(null);
-        assertThat(savedFatherChildren.getFirst().getEntity()).isEqualTo(son);
     }
 
 
@@ -300,19 +207,17 @@ class PersonSaveIntegrationTest {
 
     // ── Relationships: MARRIED_TO ─────────────────────────────────────────────
 
-   /* @Test
+    @Test
     void savePerson_withSpouse_marriedToRelationshipPersisted() {
         Person mileva = personSaveService.savePerson(
                 Person.builder().wikidataId("Q60212").name("Mileva Marić").build());
 
-        Person einstein = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        einstein.addMarriage(mileva, null, null);
-        personSaveService.savePerson(einstein);
+        Person einstein = personSaveService.savePerson(Person.builder().wikidataId("Q937").name("Albert Einstein").build());
+        personSaveService.saveMarriedRelationship(mileva.getLocalId(), einstein.getLocalId(), null, null);
 
-        // findFullByWikidataId loads spouses via collect(DISTINCT rM) / collect(DISTINCT spouse)
         List<MarriedTo> saved = personRelationshipRepository.findSpousesByPersonId("Q937");
         assertThat(saved).hasSize(1);
-        assertThat(saved.getFirst().getSpouse().getWikidataId()).isEqualTo("Q60212");
+        assertThat(saved.getFirst().getSpouse()).isEqualTo(mileva);
     }
 
     @Test
@@ -320,29 +225,18 @@ class PersonSaveIntegrationTest {
         Person mileva = personSaveService.savePerson(
                 Person.builder().wikidataId("Q60212").name("Mileva Marić").build());
 
-        Person einstein = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        einstein.addMarriage(mileva, LocalDate.of(1903, 1, 6), LocalDate.of(1919, 2, 14));
-        personSaveService.savePerson(einstein);
+        Person einstein = personSaveService.savePerson(Person.builder().wikidataId("Q937").name("Albert Einstein").build());
+        personSaveService.saveMarriedRelationship(mileva.getLocalId(),
+                einstein.getLocalId(), LocalDate.of(1903, 1, 6), LocalDate.of(1919, 2, 14));
 
         List<MarriedTo> saved = personRelationshipRepository.findSpousesByPersonId("Q937");
         assertThat(saved).hasSize(1);
-        MarriedTo marriage = saved.get(0);
+        MarriedTo marriage = saved.getFirst();
         assertThat(marriage.getStartDate()).isEqualTo(LocalDate.of(1903, 1, 6));
         assertThat(marriage.getEndDate()).isEqualTo(LocalDate.of(1919, 2, 14));
+        assertThat(marriage.getSpouse()).isEqualTo(mileva);
     }
-
-    @Test
-    void savePerson_spouseNotYetInDb_spouseSavedAutomatically() {
-        Person mileva = Person.builder().wikidataId("Q60212").name("Mileva Marić").build();
-        Person einstein = Person.builder().wikidataId("Q937").name("Albert Einstein").build();
-        einstein.addMarriage(mileva, null, null);
-
-        personSaveService.savePerson(einstein);
-
-        assertThat(personRepository.findByWikidataId("Q60212")).isPresent();
-        assertThat(personRepository.count()).isEqualTo(2);
-    }
-
+    /*
     @Test
     void savePerson_withMultipleSpouses_allMarriagesPersisted() {
         Person mileva = personSaveService.savePerson(

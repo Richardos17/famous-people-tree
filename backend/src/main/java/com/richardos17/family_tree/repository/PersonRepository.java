@@ -6,6 +6,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +57,20 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
     MERGE (child)-[:HAS_PARENT]->(parent)
     """)
     void createParentRelationship(String parentLocalId, String childLocalId);
+
+    @Query("""
+    MATCH (person1:Person {localId: $spouse1LocalId})
+    MATCH (person2:Person {localId: $spouse2LocalId})
+    MERGE (person1)-[r:MARRIED_TO]->(person2)
+    SET r.start_date = $startDate,
+        r.end_date = $endDate
+    """)
+    void createMarriageRelationship(
+            String spouse1LocalId,
+            String spouse2LocalId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 
     @Query("""
     MATCH (parent:Person)-[r:HAS_PARENT]->(child:Person)
