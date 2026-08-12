@@ -109,7 +109,7 @@ public class PersonService {
     }
 
     private Optional<PersonTreeResponseDTO> buildSimplePersonTree(String wikidataId, int depth) {
-
+        //TODO check why fetches even after it is in db, saves relatiship expanded as false
         Optional<Person> personOptional = getPersonByWikidataId(wikidataId);
 
         if (personOptional.isEmpty()) {
@@ -143,6 +143,8 @@ public class PersonService {
         Set<PersonDTO> personsDown = new HashSet<>();
         traverseUpwards(person, depth, personsUp, relationshipDTOS);
         traverseDownwards(person, depth, personsDown, relationshipDTOS);
+        person.setRelationshipsExpanded(true);
+        personSaveService.savePerson(person);
         persons.addAll(personsUp);
         persons.addAll(personsDown);
         return Optional.of(new PersonTreeResponseDTO(persons, relationshipDTOS));

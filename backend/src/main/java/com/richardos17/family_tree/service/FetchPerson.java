@@ -245,14 +245,12 @@ public class FetchPerson {
             
                     {
                         ?person wdt:P22 ?parent .
-                        BIND(REPLACE(STR(?parent),
-                            "http://www.wikidata.org/entity/", "") AS ?parentId)
+                        BIND(CONCAT('{"id":"', REPLACE(STR(?parent), "http://www.wikidata.org/entity/", ""), '"}') AS ?parentId)
                     }
                     UNION
                     {
                         ?person wdt:P25 ?parent .
-                        BIND(REPLACE(STR(?parent),
-                            "http://www.wikidata.org/entity/", "") AS ?parentId)
+                        BIND(CONCAT('{"id":"', REPLACE(STR(?parent), "http://www.wikidata.org/entity/", ""), '"}') AS ?parentId)
                     }
             
             
