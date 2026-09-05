@@ -1,11 +1,11 @@
 package com.richardos17.family_tree.controller;
 
 import com.richardos17.family_tree.DTOs.PersonDTO;
-import com.richardos17.family_tree.DTOs.RelationshipDTO;
+import com.richardos17.family_tree.DTOs.PersonTreeResponseDTO;
 import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.PersonRepository;
-import com.richardos17.family_tree.service.PersonMapper;
 import com.richardos17.family_tree.service.PersonService;
+import com.richardos17.family_tree.service.PersonMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,76 +22,44 @@ import java.util.Optional;
 @RequestMapping("/person")
 public class PersonController {
 
-    private static final int DEFAULT_TREE_DEPTH = 2;
+    private static final String DEFAULT_TREE_DEPTH = "1";
 
     private final PersonRepository personRepository;
-    private final PersonService personService;
     private final PersonMapper personMapper;
+    private final PersonService personService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PersonDTO> getPersonById(@PathVariable String id) {
-        Optional<Person> optionalPerson = personRepository.findByLocalId(id);
-
-        if (optionalPerson.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        PersonDTO person = personMapper.toDTO(personService.combinePerson(optionalPerson.get()));
-        return ResponseEntity.ok(person);
+    @GetMapping("/{wikidataId}")
+    public ResponseEntity<PersonDTO> getPersonByWikidataId(@PathVariable String wikidataId) {
+        return personService.getPersonByWikidataId(wikidataId)
+                .map(personMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
-
     @GetMapping("/name/{name}")
     public ResponseEntity<List<PersonDTO>> getPersonByName(@PathVariable String name) {
-        List<Person> people = personRepository.findByName(name);
+        List<PersonDTO> people = personService.getPersonsByName(name).stream()
+                .map(personMapper::toDTO)
+                .toList();
+        return people.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(people);
+    }
 
-        if (people.isEmpty()) {
-            return ResponseEntity.noContent().build();
+    @GetMapping("/{wikidataId}/full_tree")
+    public ResponseEntity<PersonTreeResponseDTO> getPersonFullTree(@PathVariable String wikidataId, @RequestParam(defaultValue = DEFAULT_TREE_DEPTH) int depth) {
+        Optional<PersonTreeResponseDTO> person = personService.getPersonTreeByWikidataId(wikidataId, depth, true);
+        if (person.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(people.stream().map(personService::combinePerson).map(personMapper::toDTO).toList());
+        System.out.println(person.get());
+        return ResponseEntity.ok(person.get());
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<PersonDTO>> getPersonSearch(@RequestParam String name) {
-        List<Person> people = personRepository.searchByName(name);
-        if (people.isEmpty()) {
-            return ResponseEntity.noContent().build();
+    @GetMapping("/{wikidataId}/direct_tree")
+    public ResponseEntity<PersonTreeResponseDTO> getPersonDirectTree(@PathVariable String wikidataId, @RequestParam(defaultValue = DEFAULT_TREE_DEPTH) int depth) {
+        Optional<PersonTreeResponseDTO> person = personService.getPersonTreeByWikidataId(wikidataId, depth, false);
+        if (person.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(people.stream().map(personService::combinePerson).map(personMapper::toDTO).toList());
-    }
-
-    @GetMapping("/{id}/parents")
-    public ResponseEntity<List<RelationshipDTO>> getParents(@PathVariable String id) {
-        List<RelationshipDTO> parentDTOs = personRepository.findParentsByChildId(id)
-            .stream()
-            .map(personMapper::relationshipToDTO)
-            .toList();
-
-        if (parentDTOs.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(parentDTOs);
-    }
-
-    @GetMapping("/{id}/children")
-    public ResponseEntity<List<RelationshipDTO>> getChildren(@PathVariable String id) {
-        List<RelationshipDTO> childrenDTOs = personRepository.findChildrenByParentId(id)
-            .stream()
-            .map(personMapper::relationshipToDTO)
-            .toList();
-
-        if (childrenDTOs.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(childrenDTOs);
-    }
-
-    @GetMapping("/{id}/full_tree")
-    public ResponseEntity<PersonDTO> getPersonFullTree(@PathVariable String id) {
-        return ResponseEntity.ok(personService.buildPersonTree(id, DEFAULT_TREE_DEPTH));
-    }
-
-    @GetMapping("/{id}/simple_tree")
-    public ResponseEntity<PersonDTO> getPersonSimpleTree(@PathVariable String id) {
-        return ResponseEntity.ok(personService.buildSimplePersonTree(id, DEFAULT_TREE_DEPTH));
+        System.out.println(person.get());
+        return ResponseEntity.ok(person.get());
     }
 }

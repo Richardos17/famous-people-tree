@@ -1,18 +1,23 @@
 package com.richardos17.family_tree.DTOs;
 
-import lombok.AllArgsConstructor;
+
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class MarriageDTO {
-    private PersonDTO spouse;
+@EqualsAndHashCode(callSuper = true)
+public class MarriageDTO extends RelationshipDTO {
     private LocalDate startDate;
     private LocalDate endDate;
+
+    public MarriageDTO(String personFromWikidataId, String persontoWikidataId, LocalDate startDate, LocalDate endDate) {
+        super(personFromWikidataId, persontoWikidataId, "spouse");
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
 }
