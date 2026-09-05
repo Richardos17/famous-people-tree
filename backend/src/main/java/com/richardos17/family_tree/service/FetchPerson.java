@@ -81,7 +81,7 @@ public class FetchPerson {
                     }
 
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en, mul" .
                     }
                 }
                 """, name);
@@ -130,7 +130,7 @@ public class FetchPerson {
                     }
 
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en, mul" .
                     }
                 }
                 """, wikidataId);
@@ -231,7 +231,7 @@ public class FetchPerson {
                     }
 
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en,mul" .
                         ?person      rdfs:label ?personLabel .
                     }
                 }
@@ -256,7 +256,7 @@ public class FetchPerson {
             
             
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en,mul" .
                         ?person      rdfs:label ?personLabel .
                     }
                 }
@@ -276,7 +276,7 @@ public class FetchPerson {
                     }
 
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en,mul" .
                         ?person      rdfs:label ?personLabel .
                     }
                 }
@@ -342,7 +342,7 @@ public class FetchPerson {
                     }
 
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en,mul" .
                         ?person      rdfs:label ?personLabel .
                         ?birthCountry rdfs:label ?birthCountryLabel .
                     }
@@ -400,7 +400,7 @@ public class FetchPerson {
                     }
 
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en,mul" .
                         ?person       rdfs:label ?personLabel .
                         ?birthCountry rdfs:label ?birthCountryLabel .
                     }
@@ -442,7 +442,7 @@ public class FetchPerson {
                     }
 
                     SERVICE wikibase:label {
-                        bd:serviceParam wikibase:language "en" .
+                        bd:serviceParam wikibase:language "en,mul" .
                         ?person       rdfs:label ?personLabel .
                         ?birthCountry rdfs:label ?birthCountryLabel .
                     }
