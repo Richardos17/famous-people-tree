@@ -27,6 +27,8 @@ public class PersonService {
     private final PersonSaveService personSaveService;
     private final PersonMapper personMapper;
     private final PersonRelationshipRepository personRelationshipRepository;
+    private final int expandedDecidingDepth = 2;
+
 
     /**
      * Retrieves a list of Person objects by their name. The method first searches the local
@@ -109,7 +111,6 @@ public class PersonService {
     }
 
     private Optional<PersonTreeResponseDTO> buildSimplePersonTree(String wikidataId, int depth) {
-        //TODO check why fetches even after it is in db, saves relatiship expanded as false
         Optional<Person> personOptional = getPersonByWikidataId(wikidataId);
 
         if (personOptional.isEmpty()) {
@@ -141,9 +142,12 @@ public class PersonService {
 
         Set<PersonDTO> personsUp = new HashSet<>();
         Set<PersonDTO> personsDown = new HashSet<>();
+        boolean previouslyExpanded = person.getRelationshipsExpanded();
         traverseUpwards(person, depth, personsUp, relationshipDTOS);
+        if (!previouslyExpanded) {
+            person.setRelationshipsExpanded(false);
+        }
         traverseDownwards(person, depth, personsDown, relationshipDTOS);
-        person.setRelationshipsExpanded(true);
         personSaveService.savePerson(person);
         persons.addAll(personsUp);
         persons.addAll(personsDown);
@@ -174,6 +178,9 @@ public class PersonService {
             relationships.add(new ParentRelationshipDTO(person.getWikidataId(), parentRel.getEntity().getWikidataId()));
             traverseUpwards(parentRel.getEntity(), depth - 1, visited, relationships);
         });
+        person.setRelationshipsExpanded(true);
+        personSaveService.savePerson(person);
+        //TODO set relationship expanded at the right time because when too early another leg stops to divide
     }
 
     private void traverseDownwards(Person person, int depth, Set<PersonDTO> visited, Set<RelationshipDTO> relationships) {
@@ -199,6 +206,8 @@ public class PersonService {
             relationships.add(new ParentRelationshipDTO(childRel.getEntity().getWikidataId(), person.getWikidataId()));
             traverseDownwards(childRel.getEntity(), depth - 1, visited, relationships);
         });
+        person.setRelationshipsExpanded(true);
+        personSaveService.savePerson(person);
     }
 //    private Person buildFullTree(String id, int depth, Set<String> visited) {
 //        Person person = loadBasicPerson(id).get();

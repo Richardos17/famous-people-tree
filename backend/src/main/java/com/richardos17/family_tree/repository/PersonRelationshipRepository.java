@@ -88,8 +88,8 @@ public class PersonRelationshipRepository {
                         node.get("birthdate").asLocalDate())
                 .deathdate(node.get("deathdate").isNull() ? null :
                         node.get("deathdate").asLocalDate())
-                .wikipediaLink(node.get("wikipediaLink").asString(null))
-                .imageLink(node.get("imageLink").asString(null))
+                .wikipediaLink(node.get("wikipedia_link").asString(null))
+                .imageLink(node.get("image_link").asString(null))
                 .relationshipsExpanded(node.get("relationships_expanded").asBoolean(false))
 
                 .build();

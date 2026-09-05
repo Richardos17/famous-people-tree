@@ -6,6 +6,7 @@ import com.richardos17.family_tree.domain.FamilyRelationship;
 import com.richardos17.family_tree.domain.MarriedTo;
 import com.richardos17.family_tree.domain.Person;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,10 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class FetchPerson {
 
     private final WebClient wikidataWebClient;
@@ -519,6 +520,7 @@ public class FetchPerson {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
+            log.info("Fetching: " + sparqlQuery);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to fetch data from Wikidata", e);
         }
