@@ -12,6 +12,7 @@ import com.richardos17.family_tree.repository.PersonRelationshipRepository;
 import com.richardos17.family_tree.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -41,21 +42,21 @@ public class PersonService {
      *         if no persons are found in both the database and external source.
      * @throws IllegalArgumentException if the provided name is null or blank.
      */
+    @Transactional
     public List<Person> getPersonsByName(String name) {
-        //TODO: implement method to retrieve firstly persons from db and later add from wikidata
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Name is required");
         }
-        List<Person> personsDb = personRepository.searchByName(name);
-        if (!personsDb.isEmpty()) {
-            return personsDb;
-        }
-        return fetchPerson.fetchPersonsByName(name).stream()
+
+        fetchPerson.fetchPersonsByName(name).stream()
                 .map(person -> {
                             person.setRelationshipsExpanded(false);
                             return personSaveService.savePerson(person);
                         })
                 .toList();
+
+
+        return personRepository.searchByName(name);
     }
 
     /**
