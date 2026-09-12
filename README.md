@@ -10,7 +10,6 @@ Users can search individuals, visualize their ancestry, discover relationships, 
 ### 🧠 Backend
 - **Java + Spring Boot** – main backend framework
 - **Spring Data Neo4j** – integration with graph database
-- **GraphQL (Spring for GraphQL)** – flexible API for nested data queries
 - **Neo4j** – graph database for storing relationships (family trees)
 - **Redis (planned)** – caching frequently accessed data
 - **WebClient (Spring)** – fetching data from Wikidata API
@@ -19,7 +18,7 @@ Users can search individuals, visualize their ancestry, discover relationships, 
 
 ### 🌐 Frontend
 - **Next.js (TypeScript)** – React framework for building UI
-- **React Flow / D3.js (planned)** – interactive tree visualization
+- **React Flow** – interactive tree visualization
 - **Tailwind CSS** – styling
 - **Zustand / Redux Toolkit (planned)** – state management
 
@@ -85,7 +84,6 @@ Wikidata API (external data source)
 - [ ] Display 2–3 level family tree
 
 ### Phase 2 - Backend API
-- [ ] GraphQL API
 - [ ] Wikidata integration
 
 ### Phase 3 - Frontend(MVP)
