@@ -25,7 +25,7 @@ export default function PersonNode({id, data }: NodeProps<PersonNode>){
   <div className="w-48 h-64 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md">
     {(data.handlePosition.verticalHandlePosition == VerticalHandlePosition.Top
       || data.handlePosition.verticalHandlePosition == VerticalHandlePosition.Both
-    ) && <Handle type="target" position={Position.Top} id={id} />}
+    ) && <Handle type="source" position={Position.Top} id={"t"+id} />}
     {/* Image */}
     <div className="h-28 w-full">
       <Image
@@ -66,7 +66,7 @@ export default function PersonNode({id, data }: NodeProps<PersonNode>){
     </div>
     {(data.handlePosition.verticalHandlePosition == VerticalHandlePosition.Bottom
       || data.handlePosition.verticalHandlePosition == VerticalHandlePosition.Both
-    ) && <Handle type="source" position={Position.Bottom} id={id}/>}
+    ) && <Handle type="source" position={Position.Bottom} id={"b"+id}/>}
   </div>
 );
 } 
