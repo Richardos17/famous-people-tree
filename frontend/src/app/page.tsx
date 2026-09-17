@@ -1,65 +1,265 @@
-import Image from "next/image";
+"use client"
+import '@xyflow/react/dist/style.css';
+import { ReactFlow, Background, Controls, addEdge, applyNodeChanges, applyEdgeChanges , MarkerType,type Node, type Edge, type OnConnect, type OnNodesChange, type OnEdgesChange, ConnectionMode, XYPosition } from '@xyflow/react';
+import {useState, useCallback, useRef} from 'react';
+import PersonNode from './PersonNode';
+import RelationshipEdge from './RelationshipEdge';
+import { Person } from './types/Person';
+import { PersonConnectedEdges } from './types/PersonConnectedEdges';
+import {type HandlePosition } from './types/HandlePosition';
+import { EdgeType } from './Enums';
+const nodeTypes = {
+  person: PersonNode,
+};
+const edgeTypes = {
+  parent: RelationshipEdge,
+};
+export default function Home(){
+  
+  const [nodes, setNodes]= useState<Node[]>([])
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const personEdges = useRef<Map<string, PersonConnectedEdges>>(new Map());
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+ function updateHandlePosition(
+  nodeId: string,
+  options: {
+    top?: boolean;
+    bottom?: boolean;
+    left?: boolean;
+    right?: boolean;
+  }
+) {
+  setNodes((nodes) =>
+    nodes.map((node) => {
+      if (node.id !== nodeId) {
+        return node;
+      }
+      const handlePosition:HandlePosition = node.data.handlePosition
+      const {top, bottom, left, right } = options
+      if(top != undefined){
+        handlePosition.top = top;
+      }
+      if(bottom != undefined){
+        handlePosition.bottom = bottom;
+      }
+      if(right != undefined){
+        handlePosition.right = right;
+      }
+      if(left != undefined){
+        handlePosition.left = left;
+      }
+
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          handlePosition: handlePosition,
+        },
+      };
+    })
   );
+}
+  function calculateParentPosition(rootNodePosition:XYPosition, rootNodeId:string):XYPosition{
+    const personEdgeNumber = personEdges.current.get(rootNodeId);
+
+    if (personEdgeNumber === undefined) {
+      throw new Error("Root node is undefined");
+    }
+    
+    let xPosition:number = 0;
+    if(personEdgeNumber.top % 2 == 0)
+      xPosition = rootNodePosition.x + 100 * (personEdgeNumber.top+1);
+    else
+      xPosition = rootNodePosition.x - 100 * (personEdgeNumber.top);
+    return {x: xPosition , y: rootNodePosition.y -300};
+  }
+  function calculateChildPosition(rootNodePosition:XYPosition, rootNodeId:string):XYPosition{
+    const personEdgeNumber = personEdges.current.get(rootNodeId);
+
+    if (personEdgeNumber === undefined) {
+      throw new Error("Root node is undefined");
+    }
+    
+    let xPosition:number = 0;
+    if(personEdgeNumber.top % 2 == 0)
+      xPosition = rootNodePosition.x + 100 * (personEdgeNumber.top+1);
+    else
+      xPosition = rootNodePosition.x - 100 * (personEdgeNumber.top);
+    return {x: xPosition , y: rootNodePosition.y + 300};
+  }
+  function calculateMarriagePosition(rootNodePosition:XYPosition, rootNodeId:string):XYPosition{
+    const personEdgeNumber = personEdges.current.get(rootNodeId);
+
+    if (personEdgeNumber === undefined) {
+      throw new Error("Root node is undefined");
+    }
+    
+    const xPosition:number = rootNodePosition.x + 500 * (personEdgeNumber.right+1);
+    
+    return {x: xPosition , y: rootNodePosition.y};
+  }
+  function addParent(newPerson:Person, sourcePersonNode:Node):Node{
+    const newNode: Node = {
+      id: newPerson.wikidataId,
+      data: {
+        person: newPerson,
+        handlePosition: {
+          bottom: true,
+          top:false,
+          right: false,
+          left: false
+        }
+      },
+      position: calculateParentPosition(sourcePersonNode.position, sourcePersonNode.id),
+      type: "person"
+    };
+    setNodes((oldNodes) => [...oldNodes, newNode]);
+    
+    updateHandlePosition(sourcePersonNode.id, {top: true});
+    setEdges((oldEdges) =>{
+      return [...oldEdges,  {data:{edgeType: EdgeType.Parent}, id: sourcePersonNode.id+'-'+newPerson.wikidataId, source: sourcePersonNode.id, sourceHandle: 't'+sourcePersonNode.id, target: newPerson.wikidataId, targetHandle: 'b'+newPerson.wikidataId, type: 'parent', markerEnd: { type: MarkerType.ArrowClosed }  }]})
+    personEdges.current.set(newNode.id, {
+      top: 0,
+      bottom: 1,
+      left: 0,
+      right: 0,
+    });
+    const person = personEdges.current.get(sourcePersonNode.id);
+
+    if (!person) 
+      throw new Error("Node does not exist");
+    personEdges.current.set(sourcePersonNode.id, {
+      ...person,
+      top: person.top + 1,
+    });
+    return newNode;
+
+  }
+  function addChild(newPerson:Person, sourcePersonNode:Node){
+    const newNode: Node = {
+      id: newPerson.wikidataId,
+      data: {
+        person: newPerson,
+        handlePosition: {
+          bottom: false,
+          top:true,
+          right: false,
+          left: false
+        }
+      },
+      position: calculateChildPosition(sourcePersonNode.position, sourcePersonNode.id),
+      type: "person"
+    };
+    setNodes((oldNodes) => [...oldNodes, newNode]);
+    
+    updateHandlePosition(sourcePersonNode.id, {bottom: true});
+    setEdges((oldEdges) =>{
+      return [...oldEdges,  {data:{edgeType: EdgeType.Child}, id: sourcePersonNode.id+'-'+newPerson.wikidataId, source: sourcePersonNode.id, sourceHandle: 'b'+sourcePersonNode.id, target: newPerson.wikidataId, targetHandle: 't'+newPerson.wikidataId, type: 'parent', markerEnd: { type: MarkerType.ArrowClosed }}]})
+    personEdges.current.set(newNode.id, {
+      top: 1,
+      bottom: 0,
+      left: 0,
+      right: 0,
+    });
+    const person = personEdges.current.get(sourcePersonNode.id);
+
+    if (!person) 
+      throw new Error("Node does not exist");
+    personEdges.current.set(sourcePersonNode.id, {
+      ...person,
+      bottom: person.bottom + 1,
+    });
+    return newNode;
+  }
+  function addMarriage(newPerson:Person, sourcePersonNode:Node){
+    const newNode: Node = {
+      id: newPerson.wikidataId,
+      data: {
+        person: newPerson,
+        handlePosition: {
+          bottom: false,
+          top:false,
+          right: false,
+          left: true
+        }
+      },
+      position: calculateMarriagePosition(sourcePersonNode.position, sourcePersonNode.id),
+      type: "person"
+    };
+    setNodes((oldNodes) => [...oldNodes, newNode]);
+    
+    updateHandlePosition(sourcePersonNode.id, {right: true});
+    setEdges((oldEdges) =>{
+      return [...oldEdges,  {data:{edgeType: EdgeType.Spouse, marriageStartDate: new Date(2013, 1, 4), marriageEndDate: new Date(2017, 4, 7)}, id: sourcePersonNode.id+'-'+newPerson.wikidataId, source: sourcePersonNode.id, sourceHandle: 'r'+sourcePersonNode.id, target: newPerson.wikidataId, targetHandle: 'l'+newPerson.wikidataId, type: 'parent', markerEnd: { type: MarkerType.ArrowClosed }}]})
+    personEdges.current.set(newNode.id, {
+      top: 0,
+      bottom: 0,
+      left: 1,
+      right: 0,
+    });
+    const person = personEdges.current.get(sourcePersonNode.id);
+
+    if (!person) 
+      throw new Error("Node does not exist");
+    personEdges.current.set(sourcePersonNode.id, {
+      ...person,
+      right: person.right + 1,
+    });
+    return newNode;
+  }
+  function addRootNode(newPerson:Person):Node{
+    const newNode: Node = {
+      id: newPerson.wikidataId,
+      data: {
+        person: newPerson,
+        handlePosition: {
+          top:false,
+          bottom:false,
+          right:false,
+          left:false
+        }
+      },
+      position: { x: 10, y: 500 },
+      type: "person"
+    };
+
+    setNodes((oldNodes) => [...oldNodes, newNode]);
+    personEdges.current.set(newNode.id, {
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  });
+
+    return newNode;
+  }
+      
+  const onConnect: OnConnect = useCallback((connection) => {
+    setEdges((oldEdges) => addEdge<Edge>({...connection, type:"parent"}, oldEdges))
+  }, [])
+    const onNodesChange: OnNodesChange = useCallback((connection) => setNodes((oldEdges) => applyNodeChanges<Node>(connection, oldEdges)), [])
+    const onEdgesChange: OnEdgesChange = useCallback((connection) => {setEdges((oldEdges) => applyEdgeChanges<Edge>(connection, oldEdges))}, [])
+
+    return <div style={{width: 1000, height: 500}}>
+      <ReactFlow nodes={nodes} onConnect={onConnect} connectionMode={ConnectionMode.Loose} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} nodeTypes={nodeTypes} edgeTypes={edgeTypes}>
+        <Controls/>
+        <Background/>
+      </ReactFlow>
+      <button
+  onClick={() => {
+    const rootNode:Node = addRootNode({wikidataId: "Q19",name: "Richard 1", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"})
+
+      const parent:Node = addParent({wikidataId: "Q9",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
+           addParent({wikidataId: "Q11",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
+           addParent({wikidataId: "Q141",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, parent)
+           addParent({wikidataId: "Q1441",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
+           addChild({wikidataId: "Q14441",name: "Richard 3", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
+          const married:Node = addMarriage({wikidataId: "Q741",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
+          addMarriage({wikidataId: "Q74445",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, married)
+
+  }}
+>
+  Test
+</button>
+    </div>
 }
