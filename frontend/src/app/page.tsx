@@ -1,7 +1,7 @@
 "use client"
 import '@xyflow/react/dist/style.css';
 import { ReactFlow, Background, Controls, addEdge, applyNodeChanges, applyEdgeChanges , MarkerType,type Node, type Edge, type OnConnect, type OnNodesChange, type OnEdgesChange, ConnectionMode, XYPosition } from '@xyflow/react';
-import {useState, useCallback, useEffect, useRef} from 'react';
+import {useState, useCallback, useRef} from 'react';
 import PersonNode from './PersonNode';
 import RelationshipEdge from './RelationshipEdge';
 import { Person } from './types/Person';
@@ -87,6 +87,17 @@ export default function Home(){
       xPosition = rootNodePosition.x - 100 * (personEdgeNumber.top);
     return {x: xPosition , y: rootNodePosition.y + 300};
   }
+  function calculateMarriagePosition(rootNodePosition:XYPosition, rootNodeId:string):XYPosition{
+    const personEdgeNumber = personEdges.current.get(rootNodeId);
+
+    if (personEdgeNumber === undefined) {
+      throw new Error("Root node is undefined");
+    }
+    
+    const xPosition:number = rootNodePosition.x + 500 * (personEdgeNumber.right+1);
+    
+    return {x: xPosition , y: rootNodePosition.y};
+  }
   function addParent(newPerson:Person, sourcePersonNode:Node):Node{
     const newNode: Node = {
       id: newPerson.wikidataId,
@@ -109,7 +120,7 @@ export default function Home(){
       return [...oldEdges,  {data:{edgeType: EdgeType.Parent}, id: sourcePersonNode.id+'-'+newPerson.wikidataId, source: sourcePersonNode.id, sourceHandle: 't'+sourcePersonNode.id, target: newPerson.wikidataId, targetHandle: 'b'+newPerson.wikidataId, type: 'parent', markerEnd: { type: MarkerType.ArrowClosed }  }]})
     personEdges.current.set(newNode.id, {
       top: 0,
-      bottom: 0,
+      bottom: 1,
       left: 0,
       right: 0,
     });
@@ -145,7 +156,7 @@ export default function Home(){
     setEdges((oldEdges) =>{
       return [...oldEdges,  {data:{edgeType: EdgeType.Child}, id: sourcePersonNode.id+'-'+newPerson.wikidataId, source: sourcePersonNode.id, sourceHandle: 'b'+sourcePersonNode.id, target: newPerson.wikidataId, targetHandle: 't'+newPerson.wikidataId, type: 'parent', markerEnd: { type: MarkerType.ArrowClosed }}]})
     personEdges.current.set(newNode.id, {
-      top: 0,
+      top: 1,
       bottom: 0,
       left: 0,
       right: 0,
@@ -157,6 +168,42 @@ export default function Home(){
     personEdges.current.set(sourcePersonNode.id, {
       ...person,
       bottom: person.bottom + 1,
+    });
+    return newNode;
+  }
+  function addMarriage(newPerson:Person, sourcePersonNode:Node){
+    const newNode: Node = {
+      id: newPerson.wikidataId,
+      data: {
+        person: newPerson,
+        handlePosition: {
+          bottom: false,
+          top:false,
+          right: false,
+          left: true
+        }
+      },
+      position: calculateMarriagePosition(sourcePersonNode.position, sourcePersonNode.id),
+      type: "person"
+    };
+    setNodes((oldNodes) => [...oldNodes, newNode]);
+    
+    updateHandlePosition(sourcePersonNode.id, {right: true});
+    setEdges((oldEdges) =>{
+      return [...oldEdges,  {data:{edgeType: EdgeType.Spouse, marriageStartDate: new Date(2013, 1, 4), marriageEndDate: new Date(2017, 4, 7)}, id: sourcePersonNode.id+'-'+newPerson.wikidataId, source: sourcePersonNode.id, sourceHandle: 'r'+sourcePersonNode.id, target: newPerson.wikidataId, targetHandle: 'l'+newPerson.wikidataId, type: 'parent', markerEnd: { type: MarkerType.ArrowClosed }}]})
+    personEdges.current.set(newNode.id, {
+      top: 0,
+      bottom: 0,
+      left: 1,
+      right: 0,
+    });
+    const person = personEdges.current.get(sourcePersonNode.id);
+
+    if (!person) 
+      throw new Error("Node does not exist");
+    personEdges.current.set(sourcePersonNode.id, {
+      ...person,
+      right: person.right + 1,
     });
     return newNode;
   }
@@ -207,6 +254,8 @@ export default function Home(){
            addParent({wikidataId: "Q141",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, parent)
            addParent({wikidataId: "Q1441",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
            addChild({wikidataId: "Q14441",name: "Richard 3", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
+          const married:Node = addMarriage({wikidataId: "Q741",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, rootNode)
+          addMarriage({wikidataId: "Q74445",name: "Richard 2", birthDate: new Date(2014, 9, 9 ), deathDate: new Date(2014, 9, 19), birthCountry: "SK", imageLink: "https://storage.googleapis.com/media-newsinitiative/images/GO801_GNI_VerifyingPhotos_Card2_image3.original.jpg", wikipediaLink:"string"}, married)
 
   }}
 >

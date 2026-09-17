@@ -10,6 +10,8 @@ export default function PersonNode({id, data }: NodeProps<PersonNode>){
   return (
   <div className="w-48 h-64 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md">
     {(data.handlePosition.top) && <Handle type="source" position={Position.Top} id={"t"+id} />}
+    {(data.handlePosition.left) && <Handle type="source" position={Position.Left} id={"l"+id} />}
+    {(data.handlePosition.right) && <Handle type="source" position={Position.Right} id={"r"+id} />}
     {/* Image */}
     <div className="h-28 w-full">
       <Image

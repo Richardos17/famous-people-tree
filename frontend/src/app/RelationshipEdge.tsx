@@ -36,9 +36,10 @@ export default function RelationshipEdge( { data, id,
                 transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
             }}
             >
-             {edgeLabel[data?.edgeType ?? EdgeType.Parent]}
+             {edgeLabel[data?.edgeType ?? EdgeType.Parent]}<br/>
              {data?.edgeType == EdgeType.Spouse ? 
-             "Marriage start: " + data.marriageStartDate.toLocaleDateString() +
+             "Marriage start: " + data.marriageStartDate.toLocaleDateString(): ""}<br/>
+             {data?.edgeType == EdgeType.Spouse ? 
              "\nMarriage end: " + data.marriageStartDate.toLocaleDateString(): ""}
             </div>
         </EdgeLabelRenderer>
