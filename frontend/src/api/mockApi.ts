@@ -32,7 +32,15 @@ const persons:Person[] =
             wikipediaLink: "https://en.wikipedia.org/wiki/Elsa_Einstein",
             birthCountry: "Germany"          
         },
-        ,
+        {
+            wikidataId: "Q487",
+            name: "Koch Bro",
+            birthDate: new Date("1858-02-08"),
+            deathDate: new Date("1920-02-20"),
+            imageLink: "https://commons.wikimedia.org/wiki/Special:FilePath/Pauline%20Koch.jpg",
+            wikipediaLink: "https://en.wikipedia.org/wiki/Elsa_Einstein",
+            birthCountry: "Germany"          
+        },
         {
             wikidataId: "Q474787",
             name: "Spouse koch",
@@ -53,6 +61,11 @@ const relationships:Relationship[] =  [
         {
             fromWikidataId: "Q4787",
             toWikidataId: "Q43577",
+            type: EdgeType.Parent
+        },
+        {
+            fromWikidataId: "Q487",
+            toWikidataId: "Q4357787",
             type: EdgeType.Parent
         },
         {
