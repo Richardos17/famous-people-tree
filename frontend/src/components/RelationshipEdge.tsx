@@ -1,7 +1,6 @@
 import { Handle, Position, getSmoothStepPath, BaseEdge, EdgeLabelRenderer, MarkerType, type Edge, type EdgeProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { useState} from 'react';
-import { EdgeType } from './Enums';
+import { EdgeType } from '@/graph/edgeType';
 type RelationshipEdgeType = Edge<{ edgeType: EdgeType, marriageStartDate: Date, marriageEndDate: Date }, 'relationship'>;
 const strokeColor:Record<EdgeType, string> = {
     [EdgeType.Parent]: "red",
@@ -25,7 +24,6 @@ export default function RelationshipEdge( { data, id,
  }: EdgeProps<RelationshipEdgeType>){
   //const [displayNumber, setDisplayNumber] = useState(data.number);
     const [edgePath, labelX, labelY] = getSmoothStepPath({sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition});
-    //TODO make marriage properly with existing checks and styling
    
    return <>
     <BaseEdge id={id} path={edgePath} style={{ stroke: strokeColor[data?.edgeType ?? EdgeType.Parent] }} markerEnd={markerEnd}/>
