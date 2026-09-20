@@ -6,6 +6,7 @@ import { type Node, type Edge, MarkerType } from "@xyflow/react";
 import {
   calculateParentPosition,
   calculateChildPosition,
+  calculateMarriagePosition
 } from "./positionCalculator";
 import { HandlePosition } from "@/app/types/HandlePosition";
 import { EdgeType } from "./edgeType";
@@ -57,9 +58,11 @@ export function layoutFamilyTree(
     graph.relationships
       .filter(
         (relationship) =>
-          (relationship.fromWikidataId === current ||
+          ((relationship.fromWikidataId === current ||
             relationship.toWikidataId === current) &&
-          relationship.type === EdgeType.Parent,
+            relationship.type === EdgeType.Parent) ||
+          (relationship.fromWikidataId === current &&
+            relationship.type === EdgeType.Spouse),
       )
       .forEach((relationship) => {
         const currentIsParent = relationship.fromWikidataId === current;
@@ -74,85 +77,126 @@ export function layoutFamilyTree(
         const newPerson: Person | undefined = graph.persons.get(otherPersonId);
         if (newPerson === undefined)
           throw new Error("Person connected by edge is missing.");
-        if (currentIsParent) {
-          nodes.set(newPerson.wikidataId, {
-            id: newPerson.wikidataId,
-            data: {
-              person: newPerson,
-              handlePosition: {
-                top: false,
-                bottom: true,
-                right: false,
-                left: false,
+        if (relationship.type === EdgeType.Spouse) {
+            nodes.set(newPerson.wikidataId, {
+              id: newPerson.wikidataId,
+              data: {
+                person: newPerson,
+                handlePosition: {
+                  top: false,
+                  bottom: false,
+                  right: false,
+                  left: true,
+                },
               },
-            },
-            position: calculateParentPosition(
-              currentNode.position,
-              currentEdgesNumber,
-            ),
-            type: "person",
-          });
-          updateHandlePosition(currentNode, {
-            top: true,
-          });
-          edges.push({
-            data: { edgeType: EdgeType.Parent },
-            id: current + "-" + newPerson.wikidataId,
-            source: current,
-            sourceHandle: "t" + current,
-            target: newPerson.wikidataId,
-            targetHandle: "b" + newPerson.wikidataId,
-            type: "parent",
-            markerEnd: { type: MarkerType.ArrowClosed },
-          });
-          personEdges.set(newPerson.wikidataId, {
-            top: 0,
-            bottom: 1,
-            left: 0,
-            right: 0,
-          });
-          currentEdgesNumber.top += 1;
-          queue.push(otherPersonId);
+              position: calculateMarriagePosition(
+                currentNode.position,
+                currentEdgesNumber,
+              ),
+              type: "person",
+            });
+            updateHandlePosition(currentNode, {
+              right: true,
+            });
+            edges.push({
+              data: { edgeType: EdgeType.Spouse, marriageStartDate: relationship.marriageStartDate, marriageEndDate: relationship.marriageEndDate },
+              id: current + "-" + newPerson.wikidataId,
+              source: current,
+              sourceHandle: "r" + current,
+              target: newPerson.wikidataId,
+              targetHandle: "l" + newPerson.wikidataId,
+              type: "parent",
+              markerEnd: { type: MarkerType.ArrowClosed },
+            });
+            personEdges.set(newPerson.wikidataId, {
+              top: 0,
+              bottom: 0,
+              left: 1,
+              right: 0,
+            });
+            currentEdgesNumber.right += 1;
+            queue.push(otherPersonId);
         } else {
-          nodes.set(newPerson.wikidataId, {
-            id: newPerson.wikidataId,
-            data: {
-              person: newPerson,
-              handlePosition: {
-                top: true,
-                bottom: false,
-                right: false,
-                left: false,
+          if (currentIsParent) {
+            nodes.set(newPerson.wikidataId, {
+              id: newPerson.wikidataId,
+              data: {
+                person: newPerson,
+                handlePosition: {
+                  top: false,
+                  bottom: true,
+                  right: false,
+                  left: false,
+                },
               },
-            },
-            position: calculateChildPosition(
-              currentNode.position,
-              currentEdgesNumber,
-            ),
-            type: "person",
-          });
-          updateHandlePosition(currentNode, {
-            bottom: true,
-          });
-          edges.push({
-            data: { edgeType: EdgeType.Parent },
-            id: newPerson.wikidataId+ "-" + otherPersonId,
-            source: newPerson.wikidataId,
-            sourceHandle: "t" + newPerson.wikidataId,
-            target: current,
-            targetHandle: "b" + current,
-            type: "parent",
-            markerEnd: { type: MarkerType.ArrowClosed },
-          });
-          personEdges.set(newPerson.wikidataId, {
-            top: 1,
-            bottom: 0,
-            left: 0,
-            right: 0,
-          });
+              position: calculateParentPosition(
+                currentNode.position,
+                currentEdgesNumber,
+              ),
+              type: "person",
+            });
+            updateHandlePosition(currentNode, {
+              top: true,
+            });
+            edges.push({
+              data: { edgeType: EdgeType.Parent },
+              id: current + "-" + newPerson.wikidataId,
+              source: current,
+              sourceHandle: "t" + current,
+              target: newPerson.wikidataId,
+              targetHandle: "b" + newPerson.wikidataId,
+              type: "parent",
+              markerEnd: { type: MarkerType.ArrowClosed },
+            });
+            personEdges.set(newPerson.wikidataId, {
+              top: 0,
+              bottom: 1,
+              left: 0,
+              right: 0,
+            });
+            currentEdgesNumber.top += 1;
+            queue.push(otherPersonId);
+          } else {
+            nodes.set(newPerson.wikidataId, {
+              id: newPerson.wikidataId,
+              data: {
+                person: newPerson,
+                handlePosition: {
+                  top: true,
+                  bottom: false,
+                  right: false,
+                  left: false,
+                },
+              },
+              position: calculateChildPosition(
+                currentNode.position,
+                currentEdgesNumber,
+              ),
+              type: "person",
+            });
+            updateHandlePosition(currentNode, {
+              bottom: true,
+            });
+            edges.push({
+              data: { edgeType: EdgeType.Parent },
+              id: newPerson.wikidataId + "-" + otherPersonId,
+              source: newPerson.wikidataId,
+              sourceHandle: "t" + newPerson.wikidataId,
+              target: current,
+              targetHandle: "b" + current,
+              type: "parent",
+              markerEnd: { type: MarkerType.ArrowClosed },
+            });
+            personEdges.set(newPerson.wikidataId, {
+              top: 1,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            });
 
-          currentEdgesNumber.bottom += 1;
-          queue.push(relationship.fromWikidataId);
+            currentEdgesNumber.bottom += 1;
+            queue.push(relationship.fromWikidataId);
+          }
         }
       });
   }

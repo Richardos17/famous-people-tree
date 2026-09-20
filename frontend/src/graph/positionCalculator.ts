@@ -32,9 +32,11 @@ export function calculateChildPosition(rootNodePosition?:XYPosition, personEdgeN
     else
       xPosition = rootNodePosition.x - 100 * (personEdgeNumber.top);
     return {x: xPosition , y: rootNodePosition.y + 300};
-  }/*
-export function calculateMarriagePosition(rootNodePosition:XYPosition, rootNodeId:string):XYPosition{
-    const personEdgeNumber = personEdges.current.get(rootNodeId);
+  }
+export function calculateMarriagePosition(rootNodePosition?:XYPosition, personEdgeNumber?:PersonConnectedEdges):XYPosition{
+    if (rootNodePosition === undefined) {
+      throw new Error("Position is undefined");
+    }
 
     if (personEdgeNumber === undefined) {
       throw new Error("Root node is undefined");
@@ -43,4 +45,4 @@ export function calculateMarriagePosition(rootNodePosition:XYPosition, rootNodeI
     const xPosition:number = rootNodePosition.x + 500 * (personEdgeNumber.right+1);
     
     return {x: xPosition , y: rootNodePosition.y};
-  }*/
+  }

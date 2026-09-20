@@ -22,9 +22,7 @@ export default function RelationshipEdge( { data, id,
   markerEnd,
   
  }: EdgeProps<RelationshipEdgeType>){
-  //const [displayNumber, setDisplayNumber] = useState(data.number);
     const [edgePath, labelX, labelY] = getSmoothStepPath({sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition});
-   
    return <>
     <BaseEdge id={id} path={edgePath} style={{ stroke: strokeColor[data?.edgeType ?? EdgeType.Parent] }} markerEnd={markerEnd}/>
     <EdgeLabelRenderer>
