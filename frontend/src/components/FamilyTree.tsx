@@ -37,23 +37,28 @@ const nodeTypes = {
 const edgeTypes = {
   parent: RelationshipEdge,
 };
-export default function FamilyTree() {
+type FamilyTreeProps = {
+    centerPersonId?: string;
+};
+export default function FamilyTree({centerPersonId}:FamilyTreeProps) {
   const [graph, setGraph] = useState<FamilyGraph>({
     persons: new Map(),
     relationships: [],
   });
 
   useEffect(() => {
-    fetchBasicTree().then((data) => {
+    if(!centerPersonId || centerPersonId === "")
+      return
+    fetchBasicTree(centerPersonId).then((data) => {
       const familyGraph = mapResponseToFamilyGraph(data);
       setGraph(familyGraph);
     });
-  }, []);
+  }, [centerPersonId]);
 
   const initialLayout = useMemo<FamilyTreeLayout>(
     () =>
       graph.persons.size > 0
-        ? layoutFamilyTree(graph, "Q937")
+        ? layoutFamilyTree(graph, centerPersonId)
         : { nodes: [], edges: [] },
     [graph],
   );
