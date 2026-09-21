@@ -28,8 +28,8 @@ export function mapResponseToFamilyGraph(
       imageLink: person.imageLink,
       wikipediaLink: person.wikipediaLink,
       height: person.height,
-      birthDate: person.birthDate ? new Date(person.birthDate) : null,
-      deathDate: person.deathDate ? new Date(person.deathDate) : null,
+      birthDate: person.birthdate ? new Date(person.birthdate) : null,
+      deathDate: person.deathdate ? new Date(person.deathdate) : null,
     });
   });
   const relationships: Relationship[] = apiResponse.relationships.map(

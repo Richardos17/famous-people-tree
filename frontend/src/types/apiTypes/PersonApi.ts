@@ -2,8 +2,8 @@ export type PersonApi = {
     localId:string,
     wikidataId:string,
     name: string,
-    birthDate: string | null, 
-    deathDate: string | null, 
+    birthdate: string | null, 
+    deathdate: string | null, //TODO rename symbol also in backend
     bornIn: {
         name: string;
         wikidataId: string;
