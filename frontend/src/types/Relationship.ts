@@ -4,6 +4,6 @@ export type Relationship = {
     fromWikidataId:string,
     toWikidataId:string,
     type: EdgeType
-    marriageStartDate?: Date,
-    marriageEndDate?: Date
+    marriageStartDate?: Date | null,
+    marriageEndDate?: Date | null
 }

@@ -12,13 +12,16 @@ export default function PersonNode({id, data }: NodeProps<PersonNode>){
     {(data.handlePosition.left) && <Handle type="source" position={Position.Left} id={"l"+id} />}
     {(data.handlePosition.right) && <Handle type="source" position={Position.Right} id={"r"+id} />}
     <div className="h-28 w-full">
-      <Image
+      {
+        (data.person.imageLink && data.person.imageLink !== "") && <Image
         alt={data.person.name}
         width={192}
         height={112}
         src={data.person.imageLink}
         className="h-full w-full object-cover"
       />
+      }
+      
     </div>
 
     <div className="p-3">
@@ -27,18 +30,21 @@ export default function PersonNode({id, data }: NodeProps<PersonNode>){
       </h3>
 
       <div className="space-y-1 text-sm text-gray-600">
-        <div>
+        {
+          data.person.birthDate && <div>
           <span className="font-medium text-gray-700">Born:</span>{" "}
           {data.person.birthDate.toLocaleDateString()}
         </div>
-
-        <div>
+        }
+        {
+          data.person.deathDate && <div>
           <span className="font-medium text-gray-700">Died:</span>{" "}
           {data.person.deathDate.toLocaleDateString()}
         </div>
+        }        
       </div>
-
-      <a
+        {data.person.wikipediaLink && 
+        <a
         href={data.person.wikipediaLink}
         target="_blank"
         rel="noopener noreferrer"
@@ -46,6 +52,8 @@ export default function PersonNode({id, data }: NodeProps<PersonNode>){
       >
         Wikipedia
       </a>
+        }
+      
     </div>
     {(data.handlePosition.bottom) && <Handle type="source" position={Position.Bottom} id={"b"+id}/>}
   </div>

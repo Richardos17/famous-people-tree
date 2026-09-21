@@ -1,4 +1,4 @@
-import { Handle, Position, getSmoothStepPath, BaseEdge, EdgeLabelRenderer, MarkerType, type Edge, type EdgeProps } from '@xyflow/react';
+import { getSmoothStepPath, BaseEdge, EdgeLabelRenderer, type Edge, type EdgeProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { EdgeType } from '@/graph/edgeType';
 type RelationshipEdgeType = Edge<{ edgeType: EdgeType, marriageStartDate: Date, marriageEndDate: Date }, 'relationship'>;
@@ -29,14 +29,14 @@ export default function RelationshipEdge( { data, id,
             <div
             style={{
                 position: 'absolute',
-                transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+                transform: data?.edgeType === EdgeType.Parent ? `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)` : `translate(-50%, -50%) translate(${targetX - 120}px, ${labelY}px)`,//Compute this better
             }}
             >
              {edgeLabel[data?.edgeType ?? EdgeType.Parent]}<br/>
-             {data?.edgeType == EdgeType.Spouse ? 
+             {data?.edgeType === EdgeType.Spouse && data.marriageStartDate ? 
              "Marriage start: " + data.marriageStartDate.toLocaleDateString(): ""}<br/>
-             {data?.edgeType == EdgeType.Spouse ? 
-             "\nMarriage end: " + data.marriageStartDate.toLocaleDateString(): ""}
+             {data?.edgeType === EdgeType.Spouse && data.marriageEndDate ? 
+             "\nMarriage end: " + data.marriageEndDate.toLocaleDateString(): ""}
             </div>
         </EdgeLabelRenderer>
    </> ;
