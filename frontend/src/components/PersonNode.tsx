@@ -7,18 +7,19 @@ import { type HandlePosition } from '../app/types/HandlePosition';
 type PersonNode = Node<{ person:Person, handlePosition:HandlePosition}, 'person'>;
 export default function PersonNode({id, data }: NodeProps<PersonNode>){
   return (
-  <div className="w-48 h-64 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md">
+  <div className="w-38 h-70 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md">
     {(data.handlePosition.top) && <Handle type="source" position={Position.Top} id={"t"+id} />}
     {(data.handlePosition.left) && <Handle type="source" position={Position.Left} id={"l"+id} />}
     {(data.handlePosition.right) && <Handle type="source" position={Position.Right} id={"r"+id} />}
-    <div className="h-28 w-full">
+    <div className="h-38 w-full">
       {
         (data.person.imageLink && data.person.imageLink !== "") && <Image
+        unoptimized
         alt={data.person.name}
         width={192}
-        height={112}
+        height={192}
         src={data.person.imageLink}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover object-top"
       />
       }
       

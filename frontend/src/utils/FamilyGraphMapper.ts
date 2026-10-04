@@ -22,7 +22,7 @@ function mapPerson(personApi: PersonApi): Person {
     name: personApi.name,
 
     bornIn: personApi.bornIn,
-    imageLink: personApi.imageLink,
+    imageLink: personApi.imageLink?.replace("http:", "https:"),//TODO find better fix
     wikipediaLink: personApi.wikipediaLink,
     height: personApi.height,
     birthDate: personApi.birthdate ? new Date(personApi.birthdate) : null,

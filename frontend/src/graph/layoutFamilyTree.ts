@@ -192,7 +192,7 @@ export function layoutFamilyTree(
               bottom: 0,
               left: 0,
               right: 0,
-            });
+            });//TODO fix not iterating through all of the children
 
             currentEdgesNumber.bottom += 1;
             queue.push(relationship.fromWikidataId);
@@ -200,6 +200,7 @@ export function layoutFamilyTree(
         }
       });
   }
+  console.log( { nodes: nodes.values().toArray(), edges: edges })
   return { nodes: nodes.values().toArray(), edges: edges };
 }
 function updateHandlePosition(

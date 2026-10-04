@@ -48,7 +48,7 @@ public class PersonService {
             throw new IllegalArgumentException("Name is required");
         }
 
-        fetchPerson.fetchPersonsByName(name).stream()
+        fetchPerson.fetchPersonsByName(name).stream() // TODO fix problem of when fetching simple, root person is not again fetched whole, maybe also do that person with less information is not saved(overwritten) into db
                 .map(person -> {
                             person.setRelationshipsExpanded(false);
                             return personSaveService.savePerson(person);

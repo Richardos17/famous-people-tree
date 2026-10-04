@@ -35,7 +35,38 @@ public class FetchPerson {
 
     @Value("${wikidata.sparql.base-url}")
     private String baseUrl;
+    /**
+     * Fetches all persons with the given name.
+     * @param name The name of the person to search for.
+     * @return A list of Person objects representing the persons with the given name.
+     */
+    public List<Person> fetchPersonsByNameSimple(String name) { //TOTO zistit ci nam nestaci iba takyto simple fetch kvoli optimization
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        String sparql = String.format("""
+                SELECT
+                    ?person
+                    ?personLabel
+                WHERE {
+                    SERVICE wikibase:mwapi {
+                        bd:serviceParam wikibase:api "EntitySearch" .
+                        bd:serviceParam wikibase:endpoint "www.wikidata.org" .
+                        bd:serviceParam mwapi:search "%s" .
+                        bd:serviceParam mwapi:language "en" .
+                        ?person wikibase:apiOutputItem mwapi:item .
+                    }
+                    ?person wdt:P31 wd:Q5 .                  
+                    SERVICE wikibase:label {
+                        bd:serviceParam wikibase:language "en, mul" .
+                    }
+                }
+                """, name);
 
+        return fetchData(sparql).valueStream()
+                .map(this::buildPersonFromProperties)
+                .toList();
+    }
     /**
      * Fetches all persons with the given name.
      * @param name The name of the person to search for.

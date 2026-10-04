@@ -38,9 +38,10 @@ const edgeTypes = {
   parent: RelationshipEdge,
 };
 type FamilyTreeProps = {
-    centerPersonId?: string;
+    centerPersonId?: string,
+    depth?: number
 };
-export default function FamilyTree({centerPersonId}:FamilyTreeProps) {
+export default function FamilyTree({centerPersonId, depth}:FamilyTreeProps) {
   const [graph, setGraph] = useState<FamilyGraph>({
     persons: new Map(),
     relationships: [],
@@ -49,11 +50,14 @@ export default function FamilyTree({centerPersonId}:FamilyTreeProps) {
   useEffect(() => {
     if(!centerPersonId || centerPersonId === "")
       return
-    fetchBasicTree(centerPersonId).then((data) => {
+    if(!depth || depth <= 0)
+      return
+    fetchBasicTree(centerPersonId, depth).then((data) => {
+      console.log(data)
       const familyGraph = mapResponseToFamilyGraph(data);
       setGraph(familyGraph);
     });
-  }, [centerPersonId]);
+  }, [centerPersonId, depth]);
 
   const initialLayout = useMemo<FamilyTreeLayout>(
     () =>
@@ -84,7 +88,7 @@ export default function FamilyTree({centerPersonId}:FamilyTreeProps) {
   }, []);
 
   return (
-    <div style={{ width: 1000, height: 500 }}>
+    <div style={{ width: '1000px', height: '900px' }}>
       <ReactFlow
         nodes={nodes}
         onConnect={onConnect}

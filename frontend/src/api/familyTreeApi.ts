@@ -2,8 +2,8 @@ import { ApiPersonResponse } from "@/types/apiTypes/ApiPersonResponse";
 import { ApiTreeResponse } from "@/types/apiTypes/ApiTreeResponse";
 import { FamilyGraph } from "@/types/FamilyGraph";
 
-export function fetchBasicTree(personId:string) : Promise<ApiTreeResponse>{
-     return fetch(`http://localhost:8080/person/${personId}/direct_tree`)
+export function fetchBasicTree(personId:string, depth:number) : Promise<ApiTreeResponse>{
+     return fetch(`http://localhost:8080/person/${personId}/direct_tree?depth=${depth}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

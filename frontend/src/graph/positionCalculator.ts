@@ -15,7 +15,7 @@ export function calculateParentPosition(rootNodePosition?:XYPosition, personEdge
       xPosition = rootNodePosition.x + 100 * (personEdgeNumber.top+1);
     else
       xPosition = rootNodePosition.x - 100 * (personEdgeNumber.top);
-    return {x: xPosition , y: rootNodePosition.y -300};
+    return {x: xPosition , y: rootNodePosition.y -400};
   }
 export function calculateChildPosition(rootNodePosition?:XYPosition, personEdgeNumber?:PersonConnectedEdges):XYPosition{
     if (rootNodePosition === undefined) {
@@ -27,11 +27,11 @@ export function calculateChildPosition(rootNodePosition?:XYPosition, personEdgeN
     }
     
     let xPosition:number = 0;
-    if(personEdgeNumber.top % 2 == 0)
-      xPosition = rootNodePosition.x + 100 * (personEdgeNumber.top+1);
+    if(personEdgeNumber.bottom % 2 == 0)
+      xPosition = rootNodePosition.x + 100 * (personEdgeNumber.bottom+1);
     else
-      xPosition = rootNodePosition.x - 100 * (personEdgeNumber.top);
-    return {x: xPosition , y: rootNodePosition.y + 300};
+      xPosition = rootNodePosition.x - 100 * (personEdgeNumber.bottom);
+    return {x: xPosition , y: rootNodePosition.y + 400};
   }
 export function calculateMarriagePosition(rootNodePosition?:XYPosition, personEdgeNumber?:PersonConnectedEdges):XYPosition{
     if (rootNodePosition === undefined) {
