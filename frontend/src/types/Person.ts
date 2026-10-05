@@ -1,7 +1,7 @@
 export type Person = {
     wikidataId:string
     name: string,
-    birthDate: Date | null, //TODO check why dates are not being shown
+    birthDate: Date | null,
     deathDate: Date | null, 
     bornIn: {
         name: string;

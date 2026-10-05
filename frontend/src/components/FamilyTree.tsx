@@ -31,6 +31,7 @@ import { FamilyTreeLayout } from "@/types/FamilyTreeLayout";
 import { fetchMockData } from "@/api/mockApi";
 import { fetchBasicTree } from "@/api/familyTreeApi";
 import { mapResponseToFamilyGraph } from "@/utils/FamilyGraphMapper";
+import PersonDetail from "./PersonDetail";
 const nodeTypes = {
   person: PersonNode,
 };
@@ -46,7 +47,8 @@ export default function FamilyTree({centerPersonId, depth}:FamilyTreeProps) {
     persons: new Map(),
     relationships: [],
   });
-
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>();
+  
   useEffect(() => {
     if(!centerPersonId || centerPersonId === "")
       return
@@ -57,6 +59,7 @@ export default function FamilyTree({centerPersonId, depth}:FamilyTreeProps) {
       const familyGraph = mapResponseToFamilyGraph(data);
       setGraph(familyGraph);
     });
+    setGraph(fetchMockData)
   }, [centerPersonId, depth]);
 
   const initialLayout = useMemo<FamilyTreeLayout>(
@@ -69,8 +72,15 @@ export default function FamilyTree({centerPersonId, depth}:FamilyTreeProps) {
 
   const [nodes, setNodes] = useNodesState(initialLayout.nodes);
   const [edges, setEdges] = useEdgesState(initialLayout.edges);
+
+   const handleShowDetail = (person: Person) => {    
+    setSelectedPerson(person);
+  };
+  const handleHideDetail = () => {    
+    setSelectedPerson(null);
+  };
   useEffect(() => {
-    setNodes(initialLayout.nodes);
+    setNodes(initialLayout.nodes.map(node=>({...node, data: {...node.data, onShowDetail: handleShowDetail}})));
     setEdges(initialLayout.edges);
   }, [initialLayout, setNodes, setEdges]);
   const onConnect: OnConnect = useCallback((connection) => {
@@ -86,9 +96,10 @@ export default function FamilyTree({centerPersonId, depth}:FamilyTreeProps) {
   const onEdgesChange: OnEdgesChange = useCallback((connection) => {
     setEdges((oldEdges) => applyEdgeChanges<Edge>(connection, oldEdges));
   }, []);
-
+ 
   return (
     <div style={{ width: '1000px', height: '900px' }}>
+      {selectedPerson && <PersonDetail personData={selectedPerson} onHideDetail={handleHideDetail}/>}      
       <ReactFlow
         nodes={nodes}
         onConnect={onConnect}

@@ -12,7 +12,8 @@ const persons:Person[] =
             deathDate: new Date("1920-02-20"),
             imageLink: "https://commons.wikimedia.org/wiki/Special:FilePath/Pauline%20Koch.jpg",
             wikipediaLink: "https://en.wikipedia.org/wiki/Elsa_Einstein",
-            birthCountry: "Germany"          
+            bornIn: {name:"Germany", wikidataId: "Q747"}    ,
+            height: null         
         },
         {
             wikidataId: "Q43577",
@@ -21,7 +22,8 @@ const persons:Person[] =
             deathDate: new Date("1920-02-20"),
             imageLink: "https://commons.wikimedia.org/wiki/Special:FilePath/Pauline%20Koch.jpg",
             wikipediaLink: "https://en.wikipedia.org/wiki/Elsa_Einstein",
-            birthCountry: "Germany"          
+            bornIn: {name:"Germany", wikidataId: "Q747"}    ,
+            height: null     
         },
         {
             wikidataId: "Q4787",
@@ -30,7 +32,8 @@ const persons:Person[] =
             deathDate: new Date("1920-02-20"),
             imageLink: "https://commons.wikimedia.org/wiki/Special:FilePath/Pauline%20Koch.jpg",
             wikipediaLink: "https://en.wikipedia.org/wiki/Elsa_Einstein",
-            birthCountry: "Germany"          
+            bornIn: {name:"Germany", wikidataId: "Q747"}    ,
+            height: null          
         },
         {
             wikidataId: "Q487",
@@ -39,7 +42,8 @@ const persons:Person[] =
             deathDate: new Date("1920-02-20"),
             imageLink: "https://commons.wikimedia.org/wiki/Special:FilePath/Pauline%20Koch.jpg",
             wikipediaLink: "https://en.wikipedia.org/wiki/Elsa_Einstein",
-            birthCountry: "Germany"          
+            bornIn: {name:"Germany", wikidataId: "Q747"}    ,
+            height: null            
         },
         {
             wikidataId: "Q474787",
@@ -48,7 +52,8 @@ const persons:Person[] =
             deathDate: new Date("1920-02-20"),
             imageLink: "https://commons.wikimedia.org/wiki/Special:FilePath/Pauline%20Koch.jpg",
             wikipediaLink: "https://en.wikipedia.org/wiki/Elsa_Einstein",
-            birthCountry: "Germany"          
+            bornIn: {name:"Germany", wikidataId: "Q747"}    ,
+            height: 41           
         },
     ]
 const relationships:Relationship[] =  [
