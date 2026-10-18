@@ -10,33 +10,33 @@ describe("postOrderTraversal", () => {
   it("assigns positions", () => {
     const adjList = new Map<string, PositionNode[]>();
     adjList.set("r", [
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "g" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "h" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "n" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "q" },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "g", finalx: 0},
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "h", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "n", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "q", finalx: 0 },
     ]);
     adjList.set("g", [
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "a" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "b" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "e" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "f" },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "a", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "b", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "e", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "f", finalx: 0 },
     ]);
     adjList.set("e", [
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "c" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "d" },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "c", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "d", finalx: 0 },
     ]);
     adjList.set("n", [
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "k" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "l" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "m" },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "k", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "l", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "m", finalx: 0 },
     ]);
     adjList.set("k", [
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "i" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "j" },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "i", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "j", finalx: 0 },
     ]);
     adjList.set("q", [
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "o" },
-      { x: null, y: null, mod: 0, shift: 0, wikidataId: "p" },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "o", finalx: 0 },
+      { x: null, y: null, mod: 0, shift: 0, wikidataId: "p", finalx: 0 },
     ]);
 
     firstPassPartOne(adjList, "r", 0);
@@ -45,38 +45,69 @@ describe("postOrderTraversal", () => {
 
     const expectedAdjList = new Map<string, PositionNode[]>();
     expectedAdjList.set("r", [
-      { x: 1.5, y: 0, mod: 0, shift: 0, wikidataId: "g" },
-      { x: 2.5, y: 0, mod: 0, shift: 0, wikidataId: "h" },
-      { x: 3.5, y: 0, mod: 2, shift: 0, wikidataId: "n" },
-      { x: 4.5, y: 0, mod: 4, shift: 0, wikidataId: "q" },
+      { x: 1.5, y: 0, mod: 0, shift: 0, wikidataId: "g", finalx: 0 },
+      { x: 2.5, y: 0, mod: 0, shift: 0, wikidataId: "h", finalx: 0 },
+      { x: 3.5, y: 0, mod: 2, shift: 0, wikidataId: "n", finalx: 0 },
+      { x: 4.5, y: 0, mod: 4, shift: 0, wikidataId: "q", finalx: 0 },
     ]);
     expectedAdjList.set("g", [
-      { x: 0, y: 20, mod: 0, shift: 0, wikidataId: "a" },
-      { x: 1, y: 20, mod: 0, shift: 0, wikidataId: "b" },
-      { x: 2, y: 20, mod: 1.5, shift: 0, wikidataId: "e" },
-      { x: 3, y: 20, mod: 0, shift: 0, wikidataId: "f" },
+      { x: 0, y: 20, mod: 0, shift: 0, wikidataId: "a", finalx: 0 },
+      { x: 1, y: 20, mod: 0, shift: 0, wikidataId: "b", finalx: 0 },
+      { x: 2, y: 20, mod: 1.5, shift: 0, wikidataId: "e", finalx: 0 },
+      { x: 3, y: 20, mod: 0, shift: 0, wikidataId: "f", finalx: 0 },
     ]);
     expectedAdjList.set("e", [
-      { x: 0, y: 40, mod: 0, shift: 0, wikidataId: "c" },
-      { x: 1, y: 40, mod: 0, shift: 0, wikidataId: "d" },
+      { x: 0, y: 40, mod: 0, shift: 0, wikidataId: "c", finalx: 0 },
+      { x: 1, y: 40, mod: 0, shift: 0, wikidataId: "d", finalx: 0 },
     ]);
     expectedAdjList.set("n", [
-      { x: 0.5, y: 20, mod: 0, shift: 0, wikidataId: "k" },
-      { x: 1.5, y: 20, mod: 0, shift: 0, wikidataId: "l" },
-      { x: 2.5, y: 20, mod: 0, shift: 0, wikidataId: "m" },
+      { x: 0.5, y: 20, mod: 0, shift: 0, wikidataId: "k", finalx: 0 },
+      { x: 1.5, y: 20, mod: 0, shift: 0, wikidataId: "l", finalx: 0 },
+      { x: 2.5, y: 20, mod: 0, shift: 0, wikidataId: "m", finalx: 0 },
     ]);
     expectedAdjList.set("k", [
-      { x: 0, y: 40, mod: 0, shift: 0, wikidataId: "i" },
-      { x: 1, y: 40, mod: 0, shift: 0, wikidataId: "j" },
+      { x: 0, y: 40, mod: 0, shift: 0, wikidataId: "i", finalx: 0 },
+      { x: 1, y: 40, mod: 0, shift: 0, wikidataId: "j", finalx: 0 },
     ]);
     expectedAdjList.set("q", [
-      { x: 0, y: 20, mod: 0, shift: 0, wikidataId: "o" },
-      { x: 1, y: 20, mod: 0, shift: 0, wikidataId: "p" },
+      { x: 0, y: 20, mod: 0, shift: 0, wikidataId: "o", finalx: 0 },
+      { x: 1, y: 20, mod: 0, shift: 0, wikidataId: "p", finalx: 0 },
     ]);
     expect(adjList).toEqual(expectedAdjList);
     secondPass(adjList, "r", 0, 0);
-    //console.log(adjList);
     firstPassPartTwo(adjList, "r", 0);
-    console.log(adjList);
+    const expectedAdjList2 = new Map<string, PositionNode[]>();
+    expectedAdjList2.set("r", [
+      { x: 1.5, y: 0, mod: 0, shift: 0, wikidataId: "g", finalx: 1.5 },
+      { x: 2.5, y: 0, mod: 0, shift: 1.5, wikidataId: "h", finalx: 2.5 },
+      { x: 3.5, y: 0, mod: 2, shift: 3, wikidataId: "n", finalx: 3.5 },
+      { x: 4.5, y: 0, mod: 4, shift: 4.5, wikidataId: "q", finalx: 4.5 },
+    ]);
+    expectedAdjList2.set("g", [
+      { x: 0, y: 20, mod: 0, shift: 0, wikidataId: "a", finalx: 0 },
+      { x: 1, y: 20, mod: 0, shift: 0, wikidataId: "b", finalx: 1 },
+      { x: 2, y: 20, mod: 1.5, shift: 0, wikidataId: "e", finalx: 2 },
+      { x: 3, y: 20, mod: 0, shift: 0, wikidataId: "f", finalx: 3 },
+    ]);
+    expectedAdjList2.set("e", [
+      { x: 0, y: 40, mod: 0, shift: 0, wikidataId: "c", finalx: 1.5},
+      { x: 1, y: 40, mod: 0, shift: 0, wikidataId: "d", finalx: 2.5 },
+    ]);
+    expectedAdjList2.set("n", [
+      { x: 0.5, y: 20, mod: 0, shift: 0, wikidataId: "k", finalx: 2.5 },
+      { x: 1.5, y: 20, mod: 0, shift: 0, wikidataId: "l", finalx: 3.5 },
+      { x: 2.5, y: 20, mod: 0, shift: 0, wikidataId: "m", finalx: 4.5 },
+    ]);
+    expectedAdjList2.set("k", [
+      { x: 0, y: 40, mod: 0, shift: 0, wikidataId: "i", finalx: 2 },
+      { x: 1, y: 40, mod: 0, shift: 0, wikidataId: "j", finalx: 3 },
+    ]);
+    expectedAdjList2.set("q", [
+      { x: 0, y: 20, mod: 0, shift: 0, wikidataId: "o", finalx: 4 },
+      { x: 1, y: 20, mod: 0, shift: 0, wikidataId: "p", finalx: 5 },
+    ]);
+    expect(adjList).toEqual(expectedAdjList2);
+    secondPass(adjList, "r", 0, 0);
+    console.log(adjList)
   });
 });
