@@ -81,6 +81,8 @@ export function firstPassPartTwo(
   level: number,
 ): RecursionData {
   const children = adjList.get(startNode) || [];
+  let firstNodeX: number = 0;
+  let xPos: number = firstNodeX;
   const rightmostNodeSTMaps: Map<number, number>[] = [];
   let leftmostNodeST: Map<number, number> = new Map();
   children.forEach((node, i) => {
@@ -89,38 +91,46 @@ export function firstPassPartTwo(
       adjList.has(node.wikidataId) &&
       adjList.get(node.wikidataId)!.length > 0
     ) {
-
       let recursionData = firstPassPartTwo(adjList, node.wikidataId, level + 1);
-      rightmostNodeSTMaps.push(recursionData.rightmostNodeST);
+      rightmostNodeSTMaps.push(recursionData.rightmostNodeST); //maybe also include current node, set
       leftmostNodeCurrentST = recursionData.leftmostNodeCurrentST;
       if (i == 0) {
-        leftmostNodeCurrentST.set(level, node.finalx);
-      }
+        firstNodeX = recursionData.childrenMidpoint;
+        xPos = firstNodeX;
+        leftmostNodeCurrentST.set(level, xPos);
+      } else node.mod = xPos - recursionData.childrenMidpoint;
+      rightmostNodeSTMaps[rightmostNodeSTMaps.length - 1].set(level, xPos);
       leftmostNodeCurrentST.forEach((value, key) => {
-        if(!leftmostNodeST.has(key) || leftmostNodeST.get(key) > value){
-          leftmostNodeST.set(key, value)
+        if (!leftmostNodeST.has(key) || leftmostNodeST.get(key) > value) {
+          leftmostNodeST.set(key, value + (key > level ? node.mod : 0)); //maybe can be done somewhere else
         }
       });
-
     } else {
       if (i == 0) {
-        leftmostNodeST.set(level, node.finalx);//TODO problem in overriding subtress at the end, better if it just coppies the values
-        leftmostNodeCurrentST.set(level, node.finalx);//TODO maybe useless to compare the parent node
+        leftmostNodeST.set(level, xPos);
       }
-      rightmostNodeSTMaps.push(new Map([[level, node.finalx]]));
+      rightmostNodeSTMaps.push(new Map([[level, xPos]]));
     }
+    node.x = xPos;
+    node.y = level * verticalDist;
+    xPos += siblingDist;
 
-    
     if (i == 0) return;
-    leftmostNodeCurrentST.forEach((value, key, map)=>map.set(key, value + node.shift ))
-    rightmostNodeSTMaps[rightmostNodeSTMaps.length-1].forEach((value, key, map)=>map.set(key, value + node.shift ))
+    //apply shifts which we're caused by previous nodes
+    leftmostNodeCurrentST.forEach((value, key, map) =>
+      map.set(key, value + node.shift + (key > level ? node.mod : 0)),
+    ); //TODO figure out whats the reason for these 2 lines
+    rightmostNodeSTMaps[rightmostNodeSTMaps.length - 1].forEach(
+      (value, key, map) =>
+        map.set(key, value + node.shift + (key > level ? node.mod : 0)),
+    );
+    // rightmostNodeSTMaps.forEach(ma).forEach((value, key, map)=>map.set(key, value + node.shift + (key > level ? node.mod : 0)))
+
     let shiftNeeded = 0;
     let leftSubtreeIndex = -1;
     for (let j = 0; j < i; j++) {
       const xDistances: number[] = [];
       leftmostNodeCurrentST.forEach((value, key) => {
-        if (node.wikidataId == "n") 
-          console.log("g");
         if (
           rightmostNodeSTMaps[j] !== undefined &&
           rightmostNodeSTMaps[j].has(key)
@@ -139,14 +149,21 @@ export function firstPassPartTwo(
     const shiftCurrent = relativeShift(shiftNeeded, leftSubtreeIndex, i);
     for (let j = 0; j < children?.length; j++) {
       children[j].shift += (shiftCurrent * j) / i;
-      rightmostNodeSTMaps[j]?.forEach((value, key)=>rightmostNodeSTMaps[j].set(key, value + (shiftCurrent * j) / i))
+      rightmostNodeSTMaps[j]?.forEach((value, key) =>
+        rightmostNodeSTMaps[j].set(key, value + (shiftCurrent * j) / i),
+      );
     }
   });
   const rightmostNodeSTMap = new Map<number, number>();
-  rightmostNodeSTMaps.forEach(map =>{
-    map.forEach((value, key) => rightmostNodeSTMap.set(key, value))
-  })
+  rightmostNodeSTMaps.forEach((map) => {
+    map.forEach((value, key) => {
+     // if (rightmostNodeSTMap.has(key) && rightmostNodeSTMap.get(key) < value)
+     //   return;
+      rightmostNodeSTMap.set(key, value);
+    });
+  });
   return {
+    childrenMidpoint: (xPos - siblingDist + firstNodeX) / 2,
     rightmostNodeST: rightmostNodeSTMap,
     leftmostNodeCurrentST: leftmostNodeST,
   };
@@ -155,13 +172,18 @@ export function secondPass(
   adjList: Map<string, PositionNode[]>,
   startNode: string,
   modAcc: number,
-  shiftAcc: number
+  shiftAcc: number,
 ) {
   const children = adjList.get(startNode) || [];
 
   children.forEach((node) => {
-    node.finalx = node.x + node.shift + shiftAcc + modAcc
-    secondPass(adjList, node.wikidataId, modAcc + node.mod, shiftAcc + node.shift)
+    node.finalx = node.x + node.shift + shiftAcc + modAcc;
+    secondPass(
+      adjList,
+      node.wikidataId,
+      modAcc + node.mod,
+      shiftAcc + node.shift,
+    );
   });
 }
 function relativeShift(
