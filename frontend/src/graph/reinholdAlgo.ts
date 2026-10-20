@@ -8,14 +8,30 @@ export type PositionNode = {
   wikidataId: string;
   finalx: number;
 };
+export type FinalPositionNode = {
+  x: number;
+  y: number;
+  wikidataId: string;
+};
 type SimpleEdge = { fromWikidataId: string; toWikidataId: string };
 
 type PositionTree = { positionNodes: PositionNode[]; edges: SimpleEdge[] };
 export default function createPositionTree(
-  familyGraph: FamilyGraph, startNode: string
+  familyGraph: FamilyGraph,
+  startNode: string,
 ): PositionTree {
   const adjList = preprocessEdges(familyGraph);
   firstPass(adjList, startNode, 0);
+  const children = adjList.get(startNode) || [];
+  const rootNode:FinalPositionNode = {x: 0, y: 0, wikidataId: startNode}
+  let rootNodeMod = 0
+  if (children.length > 0){
+    const existing = adjList.get(startNode)
+    if(existing !== undefined)
+      rootNodeMod = rootNode.x - ((existing[0].x + existing[0].shift) + (existing[existing.length-1].x + existing[existing.length-1].shift))/2
+  }
+  secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x)
+  //TODO traverse and crate position nodes and edges
   return { positionNodes: [], edges: [] };
 }
 function preprocessEdges(
@@ -27,10 +43,11 @@ function preprocessEdges(
       edgeMap.set(relationship.fromWikidataId, []);
     edgeMap.get(relationship.fromWikidataId)?.push({
       wikidataId: relationship.toWikidataId,
-      x: null,
-      y: null,
-      mod: null,
-      shift: null,
+      x: 0,
+      y: 0,
+      mod: 0,
+      shift: 0,
+      finalx: 0,
     });
   });
   return edgeMap;
@@ -39,9 +56,9 @@ const siblingDist: number = 1;
 const verticalDist: number = 20;
 const subTreeDist: number = 1;
 type RecursionData = {
-  childrenMidpoint?: number;
-  rightmostNodeST?: Countour;
-  leftmostNodeCurrentST?: Countour;
+  childrenMidpoint: number;
+  rightmostNodeST: Countour;
+  leftmostNodeCurrentST: Countour;
 };
 export function firstPass(
   adjList: Map<string, PositionNode[]>,
@@ -60,7 +77,7 @@ export function firstPass(
       adjList.has(node.wikidataId) &&
       adjList.get(node.wikidataId)!.length > 0 //if has children
     ) {
-      let recursionData = firstPass(adjList, node.wikidataId, level + 1); //post order traversal of child's children
+      const recursionData = firstPass(adjList, node.wikidataId, level + 1); //post order traversal of child's children
       rightmostNodeContours.push(recursionData.rightmostNodeST);
       leftmostNodeCurrentST = recursionData.leftmostNodeCurrentST; //this are leftmost nodes only of the current child
       if (i == 0) {
@@ -93,7 +110,9 @@ export function firstPass(
     let shiftNeeded = 0;
     let leftSubtreeIndex = -1; //index of most conflicting sibling
     for (let j = 0; j < i; j++) {
-      const xDistances: number[] = leftmostNodeCurrentST.calculateDistances(rightmostNodeContours[j])
+      const xDistances: number[] = leftmostNodeCurrentST.calculateDistances(
+        rightmostNodeContours[j],
+      );
       if (
         subTreeDist > Math.min(...xDistances) &&
         subTreeDist - Math.min(...xDistances) > shiftNeeded
@@ -175,28 +194,26 @@ class Countour {
   public merge(other: Countour, keepLeft?: boolean) {
     //TODO extract
     other.levelPositionMap.forEach((value, key) => {
+      const existing = this.levelPositionMap.get(key);
       if (keepLeft) {
-        if (
-          !this.levelPositionMap.has(key) ||
-          this.levelPositionMap.get(key) > value
-        ) {
+        if (existing === undefined || existing > value) {
           this.levelPositionMap.set(key, value);
         }
       } else if (
-        !this.levelPositionMap.has(key) ||
-        this.levelPositionMap.get(key) < value
+        existing === undefined || existing < value
       )
         this.levelPositionMap.set(key, value);
     });
   }
   public calculateDistances(otherRightMost: Countour): number[] {
     const xDistances: number[] = [];
+
     this.levelPositionMap.forEach((value, key) => {
-      if (
-        otherRightMost !== undefined &&
-        otherRightMost.levelPositionMap.has(key)
+      const existing = otherRightMost.levelPositionMap.get(key);
+      if (        
+        existing !== undefined
       ) {
-        xDistances.push(value - otherRightMost.levelPositionMap.get(key));
+        xDistances.push(value - existing);
       }
     });
     return xDistances;
