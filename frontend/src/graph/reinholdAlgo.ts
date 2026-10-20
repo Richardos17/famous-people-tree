@@ -83,26 +83,27 @@ export function firstPassPartTwo(
   const children = adjList.get(startNode) || [];
   let firstNodeX: number = 0;
   let xPos: number = firstNodeX;
-  const rightmostNodeSTMaps: Map<number, number>[] = [];
-  let leftmostNodeST: Map<number, number> = new Map();
-  children.forEach((node, i) => {
-    let leftmostNodeCurrentST: Map<number, number> = new Map();
+  const rightmostNodeSTMaps: Map<number, number>[] = [];//used to save rightmost element maps of all children
+  let leftmostNodeST: Map<number, number> = new Map();//stores leftmost node's of current node
+  children.forEach((node, i) => {//iterate over all children of current node
+    let leftmostNodeCurrentST: Map<number, number> = new Map();//current child's leftmost children
     if (
       adjList.has(node.wikidataId) &&
-      adjList.get(node.wikidataId)!.length > 0
+      adjList.get(node.wikidataId)!.length > 0//if has children
     ) {
-      let recursionData = firstPassPartTwo(adjList, node.wikidataId, level + 1);
-      rightmostNodeSTMaps.push(recursionData.rightmostNodeST); //maybe also include current node, set
+      let recursionData = firstPassPartTwo(adjList, node.wikidataId, level + 1);//post order traversal of child's children
+      rightmostNodeSTMaps.push(recursionData.rightmostNodeST);
       leftmostNodeCurrentST = recursionData.leftmostNodeCurrentST;
       if (i == 0) {
         firstNodeX = recursionData.childrenMidpoint;
         xPos = firstNodeX;
-        leftmostNodeCurrentST.set(level, xPos);
       } else node.mod = xPos - recursionData.childrenMidpoint;
+      leftmostNodeCurrentST.set(level, xPos);
       rightmostNodeSTMaps[rightmostNodeSTMaps.length - 1].set(level, xPos);
       leftmostNodeCurrentST.forEach((value, key) => {
-        if (!leftmostNodeST.has(key) || leftmostNodeST.get(key) > value) {
-          leftmostNodeST.set(key, value + (key > level ? node.mod : 0)); //maybe can be done somewhere else
+        const shifted_x = value + (key > level ? node.mod : 0)
+        if (!leftmostNodeST.has(key) || leftmostNodeST.get(key) > shifted_x) {
+          leftmostNodeST.set(key, shifted_x); //maybe can be done somewhere else
         }
       });
     } else {
@@ -124,7 +125,6 @@ export function firstPassPartTwo(
       (value, key, map) =>
         map.set(key, value + node.shift + (key > level ? node.mod : 0)),
     );
-    // rightmostNodeSTMaps.forEach(ma).forEach((value, key, map)=>map.set(key, value + node.shift + (key > level ? node.mod : 0)))
 
     let shiftNeeded = 0;
     let leftSubtreeIndex = -1;
@@ -157,8 +157,8 @@ export function firstPassPartTwo(
   const rightmostNodeSTMap = new Map<number, number>();
   rightmostNodeSTMaps.forEach((map) => {
     map.forEach((value, key) => {
-     // if (rightmostNodeSTMap.has(key) && rightmostNodeSTMap.get(key) < value)
-     //   return;
+      if (rightmostNodeSTMap.has(key) && rightmostNodeSTMap.get(key) > value)
+        return;
       rightmostNodeSTMap.set(key, value);
     });
   });
