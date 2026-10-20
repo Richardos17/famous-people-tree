@@ -1,5 +1,6 @@
 import {
   PositionNode,
+  firstPass,
   firstPassPartOne,
   firstPassPartTwo,
   secondPass,
@@ -39,7 +40,7 @@ describe("postOrderTraversal", () => {
       { x: null, y: null, mod: 0, shift: 0, wikidataId: "p", finalx: 0 },
     ]);
 
-  firstPassPartTwo(adjList, "r", 0);
+  firstPass(adjList, "r", 0);
     const expectedAdjList2 = new Map<string, PositionNode[]>();
     expectedAdjList2.set("r", [
       { x: 1.5, y: 0, mod: 0, shift: 0, wikidataId: "g", finalx: 1.5 },

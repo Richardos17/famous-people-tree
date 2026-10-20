@@ -1,5 +1,4 @@
 import { FamilyGraph } from "@/types/FamilyGraph";
-import { Position } from "@xyflow/react";
 
 export type PositionNode = {
   x: number;
@@ -13,10 +12,10 @@ type SimpleEdge = { fromWikidataId: string; toWikidataId: string };
 
 type PositionTree = { positionNodes: PositionNode[]; edges: SimpleEdge[] };
 export default function createPositionTree(
-  familyGraph: FamilyGraph,
+  familyGraph: FamilyGraph, startNode: string
 ): PositionTree {
-  let adjList = preprocessEdges(familyGraph);
-  firstPassPartOne(adjList, "grf4", 0);
+  const adjList = preprocessEdges(familyGraph);
+  firstPass(adjList, startNode, 0);
   return { positionNodes: [], edges: [] };
 }
 function preprocessEdges(
@@ -41,10 +40,10 @@ const verticalDist: number = 20;
 const subTreeDist: number = 1;
 type RecursionData = {
   childrenMidpoint?: number;
-  rightmostNodeST?: Map<number, number>;
-  leftmostNodeCurrentST?: Map<number, number>;
+  rightmostNodeST?: Countour;
+  leftmostNodeCurrentST?: Countour;
 };
-export function firstPassPartOne(
+export function firstPass(
   adjList: Map<string, PositionNode[]>,
   startNode: string,
   level: number,
@@ -52,92 +51,49 @@ export function firstPassPartOne(
   const children = adjList.get(startNode) || [];
   let firstNodeX: number = 0;
   let xPos: number = firstNodeX;
-
+  const rightmostNodeContours: Countour[] = []; //used to save rightmost element maps of all children
+  const leftmostNodeST: Countour = new Countour(); //stores leftmost node's of current node
   children.forEach((node, i) => {
+    //iterate over all children of current node
+    let leftmostNodeCurrentST: Countour = new Countour(); //current child's leftmost children
     if (
       adjList.has(node.wikidataId) &&
-      adjList.get(node.wikidataId)!.length > 0
+      adjList.get(node.wikidataId)!.length > 0 //if has children
     ) {
-      const recursionData = firstPassPartOne(
-        adjList,
-        node.wikidataId,
-        level + 1,
-      );
+      let recursionData = firstPass(adjList, node.wikidataId, level + 1); //post order traversal of child's children
+      rightmostNodeContours.push(recursionData.rightmostNodeST);
+      leftmostNodeCurrentST = recursionData.leftmostNodeCurrentST; //this are leftmost nodes only of the current child
       if (i == 0) {
         firstNodeX = recursionData.childrenMidpoint;
         xPos = firstNodeX;
       } else node.mod = xPos - recursionData.childrenMidpoint;
-    }
-
-    node.x = xPos;
-    node.y = level * verticalDist;
-    xPos += siblingDist;
-  });
-  return { childrenMidpoint: (xPos - siblingDist + firstNodeX) / 2 };
-}
-export function firstPassPartTwo(
-  adjList: Map<string, PositionNode[]>,
-  startNode: string,
-  level: number,
-): RecursionData {
-  const children = adjList.get(startNode) || [];
-  let firstNodeX: number = 0;
-  let xPos: number = firstNodeX;
-  const rightmostNodeSTMaps: Map<number, number>[] = [];//used to save rightmost element maps of all children
-  let leftmostNodeST: Map<number, number> = new Map();//stores leftmost node's of current node
-  children.forEach((node, i) => {//iterate over all children of current node
-    let leftmostNodeCurrentST: Map<number, number> = new Map();//current child's leftmost children
-    if (
-      adjList.has(node.wikidataId) &&
-      adjList.get(node.wikidataId)!.length > 0//if has children
-    ) {
-      let recursionData = firstPassPartTwo(adjList, node.wikidataId, level + 1);//post order traversal of child's children
-      rightmostNodeSTMaps.push(recursionData.rightmostNodeST);
-      leftmostNodeCurrentST = recursionData.leftmostNodeCurrentST;
-      if (i == 0) {
-        firstNodeX = recursionData.childrenMidpoint;
-        xPos = firstNodeX;
-      } else node.mod = xPos - recursionData.childrenMidpoint;
-      leftmostNodeCurrentST.set(level, xPos);
-      rightmostNodeSTMaps[rightmostNodeSTMaps.length - 1].set(level, xPos);
-      leftmostNodeCurrentST.forEach((value, key) => {
-        const shifted_x = value + (key > level ? node.mod : 0)
-        if (!leftmostNodeST.has(key) || leftmostNodeST.get(key) > shifted_x) {
-          leftmostNodeST.set(key, shifted_x); //maybe can be done somewhere else
-        }
-      });
+      leftmostNodeCurrentST.set(level, xPos); //include also the child into the leftmost nodes, maybe unnecesarry
+      rightmostNodeContours[rightmostNodeContours.length - 1].set(level, xPos);
     } else {
       if (i == 0) {
         leftmostNodeST.set(level, xPos);
       }
-      rightmostNodeSTMaps.push(new Map([[level, xPos]]));
+      rightmostNodeContours.push(new Countour(level, xPos)); //because it's leaf, we need to create new map
     }
     node.x = xPos;
     node.y = level * verticalDist;
     xPos += siblingDist;
 
-    if (i == 0) return;
-    //apply shifts which we're caused by previous nodes
-    leftmostNodeCurrentST.forEach((value, key, map) =>
-      map.set(key, value + node.shift + (key > level ? node.mod : 0)),
-    ); //TODO figure out whats the reason for these 2 lines
-    rightmostNodeSTMaps[rightmostNodeSTMaps.length - 1].forEach(
-      (value, key, map) =>
-        map.set(key, value + node.shift + (key > level ? node.mod : 0)),
-    );
+    if (i == 0) return; //cant deduce shifting when it's the first left child
 
+    //apply shifts which we're caused by previous nodes
+    leftmostNodeCurrentST.shift(node.shift, level, node.mod);
+    //this one didn't exist before, when applying at the bottom
+    rightmostNodeContours[rightmostNodeContours.length - 1].shift(
+      node.shift,
+      level,
+      node.mod,
+    );
+    leftmostNodeST.merge(leftmostNodeCurrentST, true);
     let shiftNeeded = 0;
-    let leftSubtreeIndex = -1;
+    let leftSubtreeIndex = -1; //index of most conflicting sibling
     for (let j = 0; j < i; j++) {
-      const xDistances: number[] = [];
-      leftmostNodeCurrentST.forEach((value, key) => {
-        if (
-          rightmostNodeSTMaps[j] !== undefined &&
-          rightmostNodeSTMaps[j].has(key)
-        ) {
-          xDistances.push(value - rightmostNodeSTMaps[j].get(key));
-        }
-      });
+      const xDistances: number[] = leftmostNodeCurrentST.calculateDistances(rightmostNodeContours[j])
       if (
         subTreeDist > Math.min(...xDistances) &&
         subTreeDist - Math.min(...xDistances) > shiftNeeded
@@ -149,18 +105,12 @@ export function firstPassPartTwo(
     const shiftCurrent = relativeShift(shiftNeeded, leftSubtreeIndex, i);
     for (let j = 0; j < children?.length; j++) {
       children[j].shift += (shiftCurrent * j) / i;
-      rightmostNodeSTMaps[j]?.forEach((value, key) =>
-        rightmostNodeSTMaps[j].set(key, value + (shiftCurrent * j) / i),
-      );
+      rightmostNodeContours[j]?.shift((shiftCurrent * j) / i); //apply shifts to siblings subtrees
     }
   });
-  const rightmostNodeSTMap = new Map<number, number>();
-  rightmostNodeSTMaps.forEach((map) => {
-    map.forEach((value, key) => {
-      if (rightmostNodeSTMap.has(key) && rightmostNodeSTMap.get(key) > value)
-        return;
-      rightmostNodeSTMap.set(key, value);
-    });
+  const rightmostNodeSTMap = new Countour(); //map of only the rightmost nodes for each level
+  rightmostNodeContours.forEach((contour) => {
+    rightmostNodeSTMap.merge(contour);
   });
   return {
     childrenMidpoint: (xPos - siblingDist + firstNodeX) / 2,
@@ -191,5 +141,64 @@ function relativeShift(
   indexOfLeftElement: number,
   indexOfRightElement: number,
 ): number {
-  return shiftNeeded / (1 - indexOfLeftElement / indexOfRightElement);
+  return (
+    Math.round(
+      (100 * shiftNeeded) / (1 - indexOfLeftElement / indexOfRightElement),
+    ) / 100
+  );
+}
+class Countour {
+  private levelPositionMap: Map<number, number>;
+  public constructor();
+  public constructor(level: number, xPos: number);
+  public constructor(level?: number, xPos?: number) {
+    this.levelPositionMap = new Map();
+    if (level !== undefined && xPos !== undefined) {
+      this.levelPositionMap.set(level, xPos);
+    }
+  }
+  public set(level: number, xPos: number) {
+    this.levelPositionMap.set(level, xPos);
+  }
+  public shift(shift: number): void;
+  public shift(shift: number, currentLevel: number, mod: number): void;
+  public shift(shift: number, currentLevel?: number, mod?: number) {
+    if (currentLevel != undefined && mod != undefined)
+      this.levelPositionMap.forEach((value, key, map) =>
+        map.set(key, value + shift + (key > currentLevel ? mod : 0)),
+      );
+    else
+      this.levelPositionMap.forEach((value, key, map) =>
+        map.set(key, value + shift),
+      );
+  }
+  public merge(other: Countour, keepLeft?: boolean) {
+    //TODO extract
+    other.levelPositionMap.forEach((value, key) => {
+      if (keepLeft) {
+        if (
+          !this.levelPositionMap.has(key) ||
+          this.levelPositionMap.get(key) > value
+        ) {
+          this.levelPositionMap.set(key, value);
+        }
+      } else if (
+        !this.levelPositionMap.has(key) ||
+        this.levelPositionMap.get(key) < value
+      )
+        this.levelPositionMap.set(key, value);
+    });
+  }
+  public calculateDistances(otherRightMost: Countour): number[] {
+    const xDistances: number[] = [];
+    this.levelPositionMap.forEach((value, key) => {
+      if (
+        otherRightMost !== undefined &&
+        otherRightMost.levelPositionMap.has(key)
+      ) {
+        xDistances.push(value - otherRightMost.levelPositionMap.get(key));
+      }
+    });
+    return xDistances;
+  }
 }
