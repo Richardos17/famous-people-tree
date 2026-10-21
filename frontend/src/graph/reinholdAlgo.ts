@@ -15,7 +15,7 @@ export type FinalPositionNode = {
 };
 type SimpleEdge = { fromWikidataId: string; toWikidataId: string };
 
-type PositionTree = { positionNodes: PositionNode[]; edges: SimpleEdge[] };
+type PositionTree = { positionNodes: FinalPositionNode[]; edges: SimpleEdge[] };
 export default function createPositionTree(
   familyGraph: FamilyGraph,
   startNode: string,
@@ -31,8 +31,9 @@ export default function createPositionTree(
       rootNodeMod = rootNode.x - ((existing[0].x + existing[0].shift) + (existing[existing.length-1].x + existing[existing.length-1].shift))/2
   }
   secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x)
-  //TODO traverse and crate position nodes and edges
-  return { positionNodes: [], edges: [] };
+  const positionNodeList:FinalPositionNode[] = adjList.values().toArray().flat().map(node=> ({x:node.finalx, y: node.y, wikidataId:node.wikidataId}))
+  const edges: SimpleEdge[] = familyGraph.relationships.map(relationship=>({fromWikidataId: relationship.fromWikidataId, toWikidataId: relationship.toWikidataId}))
+  return { positionNodes: positionNodeList, edges: edges };
 }
 function preprocessEdges(
   familyGraph: FamilyGraph,
