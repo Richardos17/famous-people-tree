@@ -19,21 +19,42 @@ type PositionTree = { positionNodes: FinalPositionNode[]; edges: SimpleEdge[] };
 export default function createPositionTree(
   familyGraph: FamilyGraph,
   startNode: string,
+  directionUpwards: boolean,
 ): PositionTree {
   const adjList = preprocessEdges(familyGraph);
-  firstPass(adjList, startNode, 0);
+  firstPass(adjList, startNode, 0, directionUpwards);
   const children = adjList.get(startNode) || [];
-  const rootNode:FinalPositionNode = {x: 0, y: 0, wikidataId: startNode}
-  let rootNodeMod = 0
-  if (children.length > 0){
-    const existing = adjList.get(startNode)
-    if(existing !== undefined)
-      rootNodeMod = rootNode.x - ((existing[0].x + existing[0].shift) + (existing[existing.length-1].x + existing[existing.length-1].shift))/2
+  const rootNode: FinalPositionNode = { x: 0, y: 0, wikidataId: startNode };
+  let rootNodeMod = 0;
+  if (children.length > 0) {
+    const existing = adjList.get(startNode);
+    if (existing !== undefined)
+      rootNodeMod =
+        rootNode.x -
+        (existing[0].x +
+          existing[0].shift +
+          (existing[existing.length - 1].x +
+            existing[existing.length - 1].shift)) /
+          2;
   }
-  secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x)
-  const positionNodeList:FinalPositionNode[] = adjList.values().toArray().flat().map(node=> ({x:node.finalx, y: node.y, wikidataId:node.wikidataId}))
-  const edges: SimpleEdge[] = familyGraph.relationships.map(relationship=>({fromWikidataId: relationship.fromWikidataId, toWikidataId: relationship.toWikidataId}))
-  return { positionNodes: positionNodeList, edges: edges };
+  secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x);
+  const positionNodeList: FinalPositionNode[] = adjList
+    .values()
+    .toArray()
+    .flat()
+    .map((node) => ({
+      x: node.finalx,
+      y: node.y,
+      wikidataId: node.wikidataId,
+    }));
+  const edges: SimpleEdge[] = familyGraph.relationships.map((relationship) => ({
+    fromWikidataId: relationship.fromWikidataId,
+    toWikidataId: relationship.toWikidataId,
+  }));
+  return {
+    positionNodes: positionNodeList,
+    edges: edges /* maybe not needed */,
+  };
 }
 function preprocessEdges(
   familyGraph: FamilyGraph,
@@ -65,6 +86,7 @@ export function firstPass(
   adjList: Map<string, PositionNode[]>,
   startNode: string,
   level: number,
+  directionUpwards: boolean
 ): RecursionData {
   const children = adjList.get(startNode) || [];
   let firstNodeX: number = 0;
@@ -78,7 +100,7 @@ export function firstPass(
       adjList.has(node.wikidataId) &&
       adjList.get(node.wikidataId)!.length > 0 //if has children
     ) {
-      const recursionData = firstPass(adjList, node.wikidataId, level + 1); //post order traversal of child's children
+      const recursionData = firstPass(adjList, node.wikidataId, level + 1, directionUpwards); //post order traversal of child's children
       rightmostNodeContours.push(recursionData.rightmostNodeST);
       leftmostNodeCurrentST = recursionData.leftmostNodeCurrentST; //this are leftmost nodes only of the current child
       if (i == 0) {
@@ -94,7 +116,7 @@ export function firstPass(
       rightmostNodeContours.push(new Countour(level, xPos)); //because it's leaf, we need to create new map
     }
     node.x = xPos;
-    node.y = level * verticalDist;
+    node.y = level * verticalDist * (directionUpwards ? -1 : 1);
     xPos += siblingDist;
 
     if (i == 0) return; //cant deduce shifting when it's the first left child
@@ -200,9 +222,7 @@ class Countour {
         if (existing === undefined || existing > value) {
           this.levelPositionMap.set(key, value);
         }
-      } else if (
-        existing === undefined || existing < value
-      )
+      } else if (existing === undefined || existing < value)
         this.levelPositionMap.set(key, value);
     });
   }
@@ -211,9 +231,7 @@ class Countour {
 
     this.levelPositionMap.forEach((value, key) => {
       const existing = otherRightMost.levelPositionMap.get(key);
-      if (        
-        existing !== undefined
-      ) {
+      if (existing !== undefined) {
         xDistances.push(value - existing);
       }
     });
