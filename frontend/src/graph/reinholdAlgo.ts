@@ -26,7 +26,7 @@ export default function createPositionTree(
   directionUpwards: boolean,
 ): Map<string, FinalPositionNode> {
   const adjList = preprocessEdges(familyGraph, directionUpwards);
-  firstPass(adjList, startNode, 1, directionUpwards);
+  firstPass(adjList, startNode, 1, !directionUpwards);
 
   const children = adjList.get(startNode) || [];
   const rootNode: FinalPositionNode = { x: 0, y: 0, wikidataId: startNode };
@@ -44,21 +44,23 @@ export default function createPositionTree(
   }
   secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x);
 
-  const finalPositionNodeMap:Map<string, FinalPositionNode> = new Map()
+  const finalPositionNodeMap: Map<string, FinalPositionNode> = new Map();
   adjList
     .values()
     .toArray()
     .flat()
-    .forEach((node) => node.finalx !== null && finalPositionNodeMap.set(node.wikidataId,({
-      x: node.finalx,
-      y: node.y,
-      wikidataId: node.wikidataId,
-    })));
-  finalPositionNodeMap.set(rootNode.wikidataId ,rootNode);
-        console.log(finalPositionNodeMap)
+    .forEach(
+      (node) =>
+        node.finalx !== null &&
+        finalPositionNodeMap.set(node.wikidataId, {
+          x: node.finalx,
+          y: node.y,
+          wikidataId: node.wikidataId,
+        }),
+    );
+  finalPositionNodeMap.set(rootNode.wikidataId, rootNode);
 
-  return finalPositionNodeMap
-  ;
+  return finalPositionNodeMap;
 }
 
 function preprocessEdges(
@@ -67,8 +69,7 @@ function preprocessEdges(
 ): Map<string, PositionNode[]> {
   const edgeMap: Map<string, PositionNode[]> = new Map();
   familyGraph.relationships.forEach((relationship) => {
-    if(relationship.type !== EdgeType.Parent)
-      return
+    if (relationship.type !== EdgeType.Parent) return;
     if (directionUpwards) {
       if (!edgeMap.has(relationship.toWikidataId))
         edgeMap.set(relationship.toWikidataId, []);
@@ -78,25 +79,28 @@ function preprocessEdges(
         y: 0,
         mod: 0,
         shift: 0,
-        finalx: 0,
+        finalx: null,
       });
-    } else if (!edgeMap.has(relationship.fromWikidataId))
-      edgeMap.set(relationship.fromWikidataId, []);
-    edgeMap.get(relationship.fromWikidataId)?.push({
-      wikidataId: relationship.toWikidataId,
-      x: 0,
-      y: 0,
-      mod: 0,
-      shift: 0,
-      finalx: 0,
-    });
+    } else {
+      if (!edgeMap.has(relationship.fromWikidataId))
+        edgeMap.set(relationship.fromWikidataId, []);
+      edgeMap.get(relationship.fromWikidataId)?.push({
+        wikidataId: relationship.toWikidataId,
+        x: 0,
+        y: 0,
+        mod: 0,
+        shift: 0,
+        finalx: null,
+      });
+    }
   });
+
   return edgeMap;
 }
 
-const siblingDist: number = 1;
-const verticalDist: number = 20;
-const subTreeDist: number = 1;
+const siblingDist: number = 300;
+const verticalDist: number = 300;
+const subTreeDist: number = 20;
 
 type RecursionData = {
   childrenMidpoint: number;

@@ -35,7 +35,9 @@ export function layoutFamilyTree(
     ...positionTreeChildren,
     ...positionTreeParents,
   ]);
-  console.log(positionTree)
+  const nodePosition = positionTree.get(centerPerson.wikidataId)
+  if(nodePosition === undefined)
+    throw new Error("Node doesn't have defined position")
   nodes.set(centerPerson.wikidataId, {
     id: centerPerson.wikidataId,
     data: {
@@ -48,8 +50,8 @@ export function layoutFamilyTree(
       },
     },
     position: {
-      x: positionTree.get(centerPerson.wikidataId)?.x,
-      y: positionTree.get(centerPerson.wikidataId)?.y,
+      x: nodePosition.x,
+      y: nodePosition.y,
     },
     type: "person",
   });
@@ -136,6 +138,9 @@ export function layoutFamilyTree(
           queue.push(otherPersonId);
         } else {
           if (currentIsParent) {
+            const nodePosition = positionTree.get(newPerson.wikidataId)
+            if(nodePosition === undefined)
+              throw new Error("Node doesn't have defined position")
             nodes.set(newPerson.wikidataId, {
               id: newPerson.wikidataId,
               data: {
@@ -148,8 +153,8 @@ export function layoutFamilyTree(
                 },
               },
               position: {
-                x: positionTree.get(newPerson.wikidataId)?.x,
-                y: positionTree.get(newPerson.wikidataId)?.y,
+                x: nodePosition.x,
+                y: nodePosition.y,
               },
               type: "person",
             });
@@ -175,6 +180,9 @@ export function layoutFamilyTree(
             currentEdgesNumber.top += 1;
             queue.push(otherPersonId);
           } else {
+            const nodePosition = positionTree.get(newPerson.wikidataId)
+            if(nodePosition === undefined)
+              throw new Error("Node doesn't have defined position")
             nodes.set(newPerson.wikidataId, {
               id: newPerson.wikidataId,
               data: {
@@ -187,8 +195,8 @@ export function layoutFamilyTree(
                 },
               },
               position: {
-                x: positionTree.get(newPerson.wikidataId)?.x,
-                y: positionTree.get(newPerson.wikidataId)?.y,
+                x: nodePosition.x,
+                y: nodePosition.y,
               },
               type: "person",
             });

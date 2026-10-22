@@ -37,7 +37,6 @@ export default function PersonNode({ id, data }: NodeProps<PersonNode>) {
         <h3 className="truncate text-base font-semibold text-gray-900">
           {data.person.name}
         </h3>
-
         <span className="space-y-1 text-sm font-medium text-gray-700">
           {(data.person.birthDate
             ? data.person.birthDate.getFullYear().toString()

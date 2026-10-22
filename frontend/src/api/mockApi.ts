@@ -70,15 +70,13 @@ const relationships:Relationship[] =  [
         },
         {
             fromWikidataId: "Q487",
-            toWikidataId: "Q4357787",
+            toWikidataId: "Q4787",
             type: EdgeType.Parent
         },
         {
-            fromWikidataId: "Q43577",
+            fromWikidataId: "Q4787",
             toWikidataId: "Q474787",
-            type: EdgeType.Spouse,
-            marriageStartDate: new Date("1919-01-01"),
-            marriageEndDate: new Date("1919-07-01"),
+            type: EdgeType.Parent,
         },]
 export function fetchMockData():FamilyGraph{
     const personMap:Map<string, Person> = new Map();
