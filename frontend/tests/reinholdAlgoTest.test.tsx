@@ -1,8 +1,6 @@
 import {
   PositionNode,
   firstPass,
-  firstPassPartOne,
-  firstPassPartTwo,
   secondPass,
 } from "@/graph/reinholdAlgo";
 

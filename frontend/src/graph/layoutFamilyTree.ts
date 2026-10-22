@@ -6,25 +6,36 @@ import { type Node, type Edge, MarkerType } from "@xyflow/react";
 import {
   calculateParentPosition,
   calculateChildPosition,
-  calculateMarriagePosition
+  calculateMarriagePosition,
 } from "./positionCalculator";
 import { HandlePosition } from "@/app/types/HandlePosition";
 import { EdgeType } from "./edgeType";
 import RelationshipEdge from "@/components/RelationshipEdge";
+import createPositionTree, {
+  FinalPositionNode,
+  PositionTree,
+} from "./reinholdAlgo";
 
 export function layoutFamilyTree(
-  graph?: FamilyGraph,
-  centerNodeId?: string,
+  graph: FamilyGraph,
+  centerNodeId: string,
 ): FamilyTreeLayout {
   const personEdges: Map<string, PersonConnectedEdges> = new Map();
   const nodes: Map<string, Node> = new Map();
   const edges: Edge[] = [];
   //create layout with nodes
-  if (graph === undefined) throw new Error("Graph is undefined");
-  if (centerNodeId === undefined) throw new Error("CenterNodeId is undefined");
   const centerPerson: Person | undefined = graph.persons.get(centerNodeId);
   if (centerPerson === undefined)
     throw new Error("Center person id not found in graph.");
+  const positionTreeChildren: Map<string, FinalPositionNode> =
+    createPositionTree(graph, centerNodeId, false);
+  const positionTreeParents: Map<string, FinalPositionNode> =
+    createPositionTree(graph, centerNodeId, true);
+  const positionTree = new Map<string, FinalPositionNode>([
+    ...positionTreeChildren,
+    ...positionTreeParents,
+  ]);
+  console.log(positionTree)
   nodes.set(centerPerson.wikidataId, {
     id: centerPerson.wikidataId,
     data: {
@@ -36,7 +47,10 @@ export function layoutFamilyTree(
         left: false,
       },
     },
-    position: { x: 0, y: 0 },
+    position: {
+      x: positionTree.get(centerPerson.wikidataId)?.x,
+      y: positionTree.get(centerPerson.wikidataId)?.y,
+    },
     type: "person",
   });
   personEdges.set(centerPerson.wikidataId, {
@@ -78,44 +92,48 @@ export function layoutFamilyTree(
         if (newPerson === undefined)
           throw new Error("Person connected by edge is missing.");
         if (relationship.type === EdgeType.Spouse) {
-            nodes.set(newPerson.wikidataId, {
-              id: newPerson.wikidataId,
-              data: {
-                person: newPerson,
-                handlePosition: {
-                  top: false,
-                  bottom: false,
-                  right: false,
-                  left: true,
-                },
+          nodes.set(newPerson.wikidataId, {
+            id: newPerson.wikidataId,
+            data: {
+              person: newPerson,
+              handlePosition: {
+                top: false,
+                bottom: false,
+                right: false,
+                left: true,
               },
-              position: calculateMarriagePosition(
-                currentNode.position,
-                currentEdgesNumber,
-              ),
-              type: "person",
-            });
-            updateHandlePosition(currentNode, {
-              right: true,
-            });
-            edges.push({
-              data: { edgeType: EdgeType.Spouse, marriageStartDate: relationship.marriageStartDate, marriageEndDate: relationship.marriageEndDate },
-              id: current + "-" + newPerson.wikidataId,
-              source: current,
-              sourceHandle: "r" + current,
-              target: newPerson.wikidataId,
-              targetHandle: "l" + newPerson.wikidataId,
-              type: "parent",
-              markerEnd: { type: MarkerType.ArrowClosed },
-            });
-            personEdges.set(newPerson.wikidataId, {
-              top: 0,
-              bottom: 0,
-              left: 1,
-              right: 0,
-            });
-            currentEdgesNumber.right += 1;
-            queue.push(otherPersonId);
+            },
+            position: calculateMarriagePosition(
+              currentNode.position,
+              currentEdgesNumber,
+            ),
+            type: "person",
+          });
+          updateHandlePosition(currentNode, {
+            right: true,
+          });
+          edges.push({
+            data: {
+              edgeType: EdgeType.Spouse,
+              marriageStartDate: relationship.marriageStartDate,
+              marriageEndDate: relationship.marriageEndDate,
+            },
+            id: current + "-" + newPerson.wikidataId,
+            source: current,
+            sourceHandle: "r" + current,
+            target: newPerson.wikidataId,
+            targetHandle: "l" + newPerson.wikidataId,
+            type: "parent",
+            markerEnd: { type: MarkerType.ArrowClosed },
+          });
+          personEdges.set(newPerson.wikidataId, {
+            top: 0,
+            bottom: 0,
+            left: 1,
+            right: 0,
+          });
+          currentEdgesNumber.right += 1;
+          queue.push(otherPersonId);
         } else {
           if (currentIsParent) {
             nodes.set(newPerson.wikidataId, {
@@ -129,10 +147,10 @@ export function layoutFamilyTree(
                   left: false,
                 },
               },
-              position: calculateParentPosition(
-                currentNode.position,
-                currentEdgesNumber,
-              ),
+              position: {
+                x: positionTree.get(newPerson.wikidataId)?.x,
+                y: positionTree.get(newPerson.wikidataId)?.y,
+              },
               type: "person",
             });
             updateHandlePosition(currentNode, {
@@ -168,10 +186,10 @@ export function layoutFamilyTree(
                   left: false,
                 },
               },
-              position: calculateChildPosition(
-                currentNode.position,
-                currentEdgesNumber,
-              ),
+              position: {
+                x: positionTree.get(newPerson.wikidataId)?.x,
+                y: positionTree.get(newPerson.wikidataId)?.y,
+              },
               type: "person",
             });
             updateHandlePosition(currentNode, {
@@ -192,7 +210,7 @@ export function layoutFamilyTree(
               bottom: 0,
               left: 0,
               right: 0,
-            });//TODO fix not iterating through all of the children
+            }); //TODO fix not iterating through all of the children
 
             currentEdgesNumber.bottom += 1;
             queue.push(relationship.fromWikidataId);
@@ -200,7 +218,6 @@ export function layoutFamilyTree(
         }
       });
   }
-  console.log( { nodes: nodes.values().toArray(), edges: edges })
   return { nodes: nodes.values().toArray(), edges: edges };
 }
 function updateHandlePosition(

@@ -1,4 +1,5 @@
 import { FamilyGraph } from "@/types/FamilyGraph";
+import { EdgeType } from "./edgeType";
 
 export type PositionNode = {
   x: number;
@@ -6,7 +7,7 @@ export type PositionNode = {
   mod: number;
   shift: number;
   wikidataId: string;
-  finalx: number;
+  finalx: number | null;
 };
 export type FinalPositionNode = {
   x: number;
@@ -15,14 +16,18 @@ export type FinalPositionNode = {
 };
 type SimpleEdge = { fromWikidataId: string; toWikidataId: string };
 
-type PositionTree = { positionNodes: FinalPositionNode[]; edges: SimpleEdge[] };
+export type PositionTree = {
+  positionNodes: FinalPositionNode[];
+  edges: SimpleEdge[];
+};
 export default function createPositionTree(
   familyGraph: FamilyGraph,
   startNode: string,
   directionUpwards: boolean,
-): PositionTree {
-  const adjList = preprocessEdges(familyGraph);
+): Map<string, FinalPositionNode> {
+  const adjList = preprocessEdges(familyGraph, directionUpwards);
   firstPass(adjList, startNode, 0, directionUpwards);
+
   const children = adjList.get(startNode) || [];
   const rootNode: FinalPositionNode = { x: 0, y: 0, wikidataId: startNode };
   let rootNodeMod = 0;
@@ -38,30 +43,44 @@ export default function createPositionTree(
           2;
   }
   secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x);
-  const positionNodeList: FinalPositionNode[] = adjList
+
+  const finalPositionNodeMap:Map<string, FinalPositionNode> = new Map()
+  adjList
     .values()
     .toArray()
     .flat()
-    .map((node) => ({
+    .forEach((node) => node.finalx !== null && finalPositionNodeMap.set(node.wikidataId,{
       x: node.finalx,
       y: node.y,
       wikidataId: node.wikidataId,
     }));
-  const edges: SimpleEdge[] = familyGraph.relationships.map((relationship) => ({
-    fromWikidataId: relationship.fromWikidataId,
-    toWikidataId: relationship.toWikidataId,
-  }));
-  return {
-    positionNodes: positionNodeList,
-    edges: edges /* maybe not needed */,
-  };
+  finalPositionNodeMap.set(rootNode.wikidataId ,rootNode);
+        console.log(finalPositionNodeMap)
+
+  return finalPositionNodeMap
+  ;
 }
+
 function preprocessEdges(
   familyGraph: FamilyGraph,
+  directionUpwards: boolean,
 ): Map<string, PositionNode[]> {
   const edgeMap: Map<string, PositionNode[]> = new Map();
   familyGraph.relationships.forEach((relationship) => {
-    if (!edgeMap.has(relationship.fromWikidataId))
+    if(relationship.type !== EdgeType.Parent)
+      return
+    if (directionUpwards) {
+      if (!edgeMap.has(relationship.toWikidataId))
+        edgeMap.set(relationship.toWikidataId, []);
+      edgeMap.get(relationship.toWikidataId)?.push({
+        wikidataId: relationship.fromWikidataId,
+        x: 0,
+        y: 0,
+        mod: 0,
+        shift: 0,
+        finalx: 0,
+      });
+    } else if (!edgeMap.has(relationship.fromWikidataId))
       edgeMap.set(relationship.fromWikidataId, []);
     edgeMap.get(relationship.fromWikidataId)?.push({
       wikidataId: relationship.toWikidataId,
@@ -74,9 +93,11 @@ function preprocessEdges(
   });
   return edgeMap;
 }
+
 const siblingDist: number = 1;
 const verticalDist: number = 20;
 const subTreeDist: number = 1;
+
 type RecursionData = {
   childrenMidpoint: number;
   rightmostNodeST: Countour;
@@ -86,7 +107,7 @@ export function firstPass(
   adjList: Map<string, PositionNode[]>,
   startNode: string,
   level: number,
-  directionUpwards: boolean
+  directionUpwards: boolean,
 ): RecursionData {
   const children = adjList.get(startNode) || [];
   let firstNodeX: number = 0;
@@ -100,7 +121,12 @@ export function firstPass(
       adjList.has(node.wikidataId) &&
       adjList.get(node.wikidataId)!.length > 0 //if has children
     ) {
-      const recursionData = firstPass(adjList, node.wikidataId, level + 1, directionUpwards); //post order traversal of child's children
+      const recursionData = firstPass(
+        adjList,
+        node.wikidataId,
+        level + 1,
+        directionUpwards,
+      ); //post order traversal of child's children
       rightmostNodeContours.push(recursionData.rightmostNodeST);
       leftmostNodeCurrentST = recursionData.leftmostNodeCurrentST; //this are leftmost nodes only of the current child
       if (i == 0) {
@@ -215,7 +241,6 @@ class Countour {
       );
   }
   public merge(other: Countour, keepLeft?: boolean) {
-    //TODO extract
     other.levelPositionMap.forEach((value, key) => {
       const existing = this.levelPositionMap.get(key);
       if (keepLeft) {
