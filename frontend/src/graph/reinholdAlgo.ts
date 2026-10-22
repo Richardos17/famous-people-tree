@@ -26,7 +26,7 @@ export default function createPositionTree(
   directionUpwards: boolean,
 ): Map<string, FinalPositionNode> {
   const adjList = preprocessEdges(familyGraph, directionUpwards);
-  firstPass(adjList, startNode, 0, directionUpwards);
+  firstPass(adjList, startNode, 1, directionUpwards);
 
   const children = adjList.get(startNode) || [];
   const rootNode: FinalPositionNode = { x: 0, y: 0, wikidataId: startNode };
@@ -49,11 +49,11 @@ export default function createPositionTree(
     .values()
     .toArray()
     .flat()
-    .forEach((node) => node.finalx !== null && finalPositionNodeMap.set(node.wikidataId,{
+    .forEach((node) => node.finalx !== null && finalPositionNodeMap.set(node.wikidataId,({
       x: node.finalx,
       y: node.y,
       wikidataId: node.wikidataId,
-    }));
+    })));
   finalPositionNodeMap.set(rootNode.wikidataId ,rootNode);
         console.log(finalPositionNodeMap)
 
