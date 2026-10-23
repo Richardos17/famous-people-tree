@@ -4,7 +4,7 @@ import SearchField from "@/components/SearchField";
 import { useState } from "react";
 
 export default function Home() {
-  const [selectedPersonId, setSelectedPersonId] = useState("Q4787");
+  const [selectedPersonId, setSelectedPersonId] = useState("Q937");
   const [selectedDepth, setSelectedDepth] = useState(1);
 
   return (

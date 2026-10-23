@@ -1,0 +1,723 @@
+{
+    "persons": [
+        {
+            "localId": "8e34b9fc-c5e7-4b8d-87f6-d21aff52466e",
+            "wikidataId": "Q937",
+            "name": "Albert Einstein",
+            "birthdate": "1879-03-14",
+            "deathdate": "1955-04-18",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Albert%20Einstein%20Head%20cleaned.jpg",
+            "wikipediaLink": "https://en.wikipedia.org/wiki/Albert_Einstein",
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "b5d925d7-cc35-42a7-9067-5a3f96cdea3b",
+            "wikidataId": "Q30345389",
+            "name": "Blumle Sontheimer",
+            "birthdate": "1786-01-01",
+            "deathdate": "1856-02-13",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "fd4ed68a-4887-42e2-b67b-8fb4b2ba9db1",
+            "wikidataId": "Q30345861",
+            "name": "Gedalja Chajim Bernheimer",
+            "birthdate": "1788-09-27",
+            "deathdate": "1873-04-16",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "95dfc14e-536f-4574-abf7-b690d186e37e",
+            "wikidataId": "Q30347309",
+            "name": "Loeb Samuel Doerzbacher",
+            "birthdate": "1757-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "a25163e1-c9fb-41e3-9d53-054d6c71dd46",
+            "wikidataId": "Q30278340",
+            "name": "David Veit Einstein",
+            "birthdate": "1713-01-01",
+            "deathdate": "1763-01-01",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "b6cc8a56-cdaf-4345-889d-955f338c9536",
+            "wikidataId": "Q22277671",
+            "name": "Thomas Martin Einstein",
+            "birthdate": "1955-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": "https://en.wikipedia.org/wiki/Thomas_Martin_Einstein",
+            "height": null,
+            "bornIn": {
+                "name": "Switzerland",
+                "wikidataId": "Q39"
+            }
+        },
+        {
+            "localId": "ce2317e3-0933-49c7-8fda-56ad117d73aa",
+            "wikidataId": "Q118253",
+            "name": "Eduard Einstein",
+            "birthdate": "1910-07-28",
+            "deathdate": "1965-10-25",
+            "imageLink": null,
+            "wikipediaLink": "https://en.wikipedia.org/wiki/Eduard_Einstein",
+            "height": null,
+            "bornIn": {
+                "name": "Switzerland",
+                "wikidataId": "Q39"
+            }
+        },
+        {
+            "localId": "b74dc4ae-7dca-4d3c-b92e-8c83b4a98f3e",
+            "wikidataId": "Q30346415",
+            "name": "Elise Weil Bernheimer",
+            "birthdate": "1789-11-22",
+            "deathdate": "1872-02-23",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "a6518c08-f2ed-416d-b22d-bca52698bb58",
+            "wikidataId": "Q30278286",
+            "name": "Lia Heilbronner",
+            "birthdate": "1745-01-01",
+            "deathdate": "1801-02-27",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "a7730db6-8dff-43f1-879a-630ed63d4f99",
+            "wikidataId": "Q30278344",
+            "name": "Moyses Einstein",
+            "birthdate": "1689-01-01",
+            "deathdate": "1732-01-01",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "d345b8d1-2720-4532-af02-eb349e031d34",
+            "wikidataId": "Q30278245",
+            "name": "Helen Einstein",
+            "birthdate": "1814-07-03",
+            "deathdate": "1887-08-20",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Helen%20Einstein.jpg",
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "da020a71-8ac2-4900-8fa4-826547321dcb",
+            "wikidataId": "Q30278300",
+            "name": "Isak Oberdorf Schmal",
+            "birthdate": "1744-08-02",
+            "deathdate": "1816-06-23",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "211f3751-88a0-4d92-a114-1004a8992614",
+            "wikidataId": "Q30347362",
+            "name": "Golius Doerzbacher",
+            "birthdate": "1761-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "b8916042-4619-49ad-bf3b-e978c5e1b2d1",
+            "wikidataId": "Q30278563",
+            "name": "David Obernauer",
+            "birthdate": null,
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "458448e3-30c9-472b-a2e0-6e82e5d39bfb",
+            "wikidataId": "Q30278302",
+            "name": "Johanna Charlotte Bernheim",
+            "birthdate": "1751-04-12",
+            "deathdate": "1796-09-28",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "751c337e-c10a-4d15-93e3-0daef280f3ee",
+            "wikidataId": "Q30278323",
+            "name": "Rupert Einstein",
+            "birthdate": "1759-07-21",
+            "deathdate": "1834-04-04",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "48eb2e2b-2fcf-49c3-8191-5663b2444148",
+            "wikidataId": "Q30278345",
+            "name": "Baruch Moses Einstein",
+            "birthdate": "1665-01-01",
+            "deathdate": "1750-01-01",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "1f7f9327-0ce2-4b94-ae92-55b716044e74",
+            "wikidataId": "Q30278268",
+            "name": "Fanny Schmal",
+            "birthdate": "1782-05-08",
+            "deathdate": "1866-11-06",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "88443b71-1f8c-4b85-8253-a4b64fd730f3",
+            "wikidataId": "Q468357",
+            "name": "Lieserl (Einstein)",
+            "birthdate": "1902-01-01",
+            "deathdate": "1903-09-01",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Serbia",
+                "wikidataId": "Q403"
+            }
+        },
+        {
+            "localId": "141d2f41-23e6-479f-80c7-d887aee8884b",
+            "wikidataId": "Q30278328",
+            "name": "Rebekka Obernauer",
+            "birthdate": "1770-05-22",
+            "deathdate": "1852-02-24",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "6b15addb-f513-4673-84ab-e83542a2c165",
+            "wikidataId": "Q1712755",
+            "name": "Julius Koch",
+            "birthdate": "1816-02-19",
+            "deathdate": "1895-01-01",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Julius%20Koch%20Cannstatt.jpg",
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "531d31f4-d2a7-4c1f-af9c-bfd829b1894a",
+            "wikidataId": "Q30278349",
+            "name": "Moses Ainstein",
+            "birthdate": "1640-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "0da13204-5a9e-46f3-b882-6e84df242740",
+            "wikidataId": "Q30308656",
+            "name": "Judith Haymann",
+            "birthdate": "1690-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "9ee9adb3-2255-4147-94b8-e112d23ef591",
+            "wikidataId": "Q30278428",
+            "name": "Caroline Ehrlich",
+            "birthdate": "1713-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "3f45edf4-4836-4fa8-a896-442c8413bb8d",
+            "wikidataId": "Q76346",
+            "name": "Mileva Marić",
+            "birthdate": "1875-12-19",
+            "deathdate": "1948-08-04",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Mileva%20Maric%201912.jpg",
+            "wikipediaLink": "https://en.wikipedia.org/wiki/Mileva_Mari%C4%87",
+            "height": null,
+            "bornIn": {
+                "name": "Serbia",
+                "wikidataId": "Q403"
+            }
+        },
+        {
+            "localId": "9db57fa2-a8fa-4185-9ce3-7e46061827f3",
+            "wikidataId": "Q88665",
+            "name": "Hermann Einstein",
+            "birthdate": "1847-08-30",
+            "deathdate": "1902-10-10",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Hermann%20einstein.jpg",
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "4447346b-9650-462f-8f1a-a84de55b9fd6",
+            "wikidataId": "Q30345556",
+            "name": "Zadok Loeb Koch",
+            "birthdate": "1783-01-01",
+            "deathdate": "1852-10-07",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "dbca5393-ab0a-4c57-b42a-0d61721ddb49",
+            "wikidataId": "Q30278333",
+            "name": "Judith Hilber",
+            "birthdate": "1750-01-01",
+            "deathdate": "1773-01-01",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "5037a224-a570-4489-aeb9-44210158970b",
+            "wikidataId": "Q30278332",
+            "name": "Samuel Obernauer",
+            "birthdate": "1750-01-01",
+            "deathdate": "1795-03-26",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "b39d42b1-7307-4940-80a0-25ab173c6d2f",
+            "wikidataId": "Q30278277",
+            "name": "Heiman Moos",
+            "birthdate": "1740-01-01",
+            "deathdate": "1815-06-27",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "f8364f7b-ce69-4174-89c2-32b794163d8e",
+            "wikidataId": "Q123371",
+            "name": "Hans Albert Einstein",
+            "birthdate": "1904-05-14",
+            "deathdate": "1973-07-26",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Hans-Albert-Einstein-1953.jpg",
+            "wikipediaLink": "https://en.wikipedia.org/wiki/Hans_Albert_Einstein",
+            "height": null,
+            "bornIn": {
+                "name": "Switzerland",
+                "wikidataId": "Q39"
+            }
+        },
+        {
+            "localId": "e994f8a1-5c2a-489a-99b4-41dda5b7c61e",
+            "wikidataId": "Q30308490",
+            "name": "Borichle Einstein",
+            "birthdate": "1665-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "803dc5bb-08f0-43d5-8202-cd9645566f2d",
+            "wikidataId": "Q30278335",
+            "name": "Helene Handle Steppach",
+            "birthdate": "1737-01-01",
+            "deathdate": null,
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "dd96845b-c9e3-4188-a662-a290ea5a53f4",
+            "wikidataId": "Q30278334",
+            "name": "Naphtali Hirsch Einstein",
+            "birthdate": "1733-01-01",
+            "deathdate": "1799-01-01",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": null
+        },
+        {
+            "localId": "0b90ba2e-43d7-43bb-b581-d0ba419abd76",
+            "wikidataId": "Q30278257",
+            "name": "Heinrich Hayum Moos",
+            "birthdate": "1772-05-24",
+            "deathdate": "1845-07-27",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "3fc1906d-a17e-44b0-b339-b7400a005bc4",
+            "wikidataId": "Q824855",
+            "name": "Bernhard Caesar Einstein",
+            "birthdate": "1930-07-10",
+            "deathdate": "2008-09-30",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Bernard%20Einstein.jpg",
+            "wikipediaLink": "https://en.wikipedia.org/wiki/Bernhard_Einstein",
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "bfbfd044-cdc7-4541-8e71-6922111c0007",
+            "wikidataId": "Q30277523",
+            "name": "Abraham Einstein",
+            "birthdate": "1808-04-16",
+            "deathdate": "1868-11-21",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Abraham%20Einstein.jpg",
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "acbe1636-8d9b-488d-b691-46d82874fe5e",
+            "wikidataId": "Q4357787",
+            "name": "Pauline Koch",
+            "birthdate": "1858-02-08",
+            "deathdate": "1920-02-20",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Pauline%20Koch.jpg",
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "9f6c45d8-96b4-49b0-a7cc-b2ea3531fc9c",
+            "wikidataId": "Q68761",
+            "name": "Elsa Einstein",
+            "birthdate": "1876-01-18",
+            "deathdate": "1936-12-20",
+            "imageLink": "http://commons.wikimedia.org/wiki/Special:FilePath/Bundesarchiv%20Bild%20102-00486A%2C%20Elsa%20Einstein.jpg",
+            "wikipediaLink": "https://en.wikipedia.org/wiki/Elsa_Einstein",
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        },
+        {
+            "localId": "4292e013-1b3d-4a68-9ef5-e657b5121e96",
+            "wikidataId": "Q30283429",
+            "name": "Annette Bernheimer",
+            "birthdate": "1825-03-08",
+            "deathdate": "1886-06-05",
+            "imageLink": null,
+            "wikipediaLink": null,
+            "height": null,
+            "bornIn": {
+                "name": "Germany",
+                "wikidataId": "Q183"
+            }
+        }
+    ],
+    "relationships": [
+        {
+            "personFromWikidataId": "Q30278344",
+            "persontoWikidataId": "Q30278345",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278340",
+            "persontoWikidataId": "Q30308656",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30283429",
+            "persontoWikidataId": "Q30345861",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278328",
+            "persontoWikidataId": "Q30278333",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278323",
+            "persontoWikidataId": "Q30278334",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278345",
+            "persontoWikidataId": "Q30278349",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278268",
+            "persontoWikidataId": "Q30278302",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30345556",
+            "persontoWikidataId": "Q30347309",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q1712755",
+            "persontoWikidataId": "Q30345389",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q4357787",
+            "persontoWikidataId": "Q1712755",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30345556",
+            "persontoWikidataId": "Q30347362",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278323",
+            "persontoWikidataId": "Q30278335",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q937",
+            "persontoWikidataId": "Q68761",
+            "startDate": "1919-01-01",
+            "endDate": "1936-12-20",
+            "type": "spouse"
+        },
+        {
+            "personFromWikidataId": "Q30278268",
+            "persontoWikidataId": "Q30278300",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278245",
+            "persontoWikidataId": "Q30278268",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q118253",
+            "persontoWikidataId": "Q937",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q123371",
+            "persontoWikidataId": "Q937",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278332",
+            "persontoWikidataId": "Q30278563",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278334",
+            "persontoWikidataId": "Q30278340",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30283429",
+            "persontoWikidataId": "Q30346415",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278334",
+            "persontoWikidataId": "Q30278428",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q88665",
+            "persontoWikidataId": "Q30277523",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30277523",
+            "persontoWikidataId": "Q30278328",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278257",
+            "persontoWikidataId": "Q30278286",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278344",
+            "persontoWikidataId": "Q30308490",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q937",
+            "persontoWikidataId": "Q88665",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q1712755",
+            "persontoWikidataId": "Q30345556",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278340",
+            "persontoWikidataId": "Q30278344",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q4357787",
+            "persontoWikidataId": "Q30283429",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q468357",
+            "persontoWikidataId": "Q937",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q937",
+            "persontoWikidataId": "Q4357787",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278245",
+            "persontoWikidataId": "Q30278257",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q88665",
+            "persontoWikidataId": "Q30278245",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q824855",
+            "persontoWikidataId": "Q123371",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30277523",
+            "persontoWikidataId": "Q30278323",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q30278257",
+            "persontoWikidataId": "Q30278277",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q22277671",
+            "persontoWikidataId": "Q824855",
+            "type": "parent"
+        },
+        {
+            "personFromWikidataId": "Q937",
+            "persontoWikidataId": "Q76346",
+            "startDate": "1903-01-16",
+            "endDate": "1919-02-14",
+            "type": "spouse"
+        },
+        {
+            "personFromWikidataId": "Q30278328",
+            "persontoWikidataId": "Q30278332",
+            "type": "parent"
+        }
+    ]
+}

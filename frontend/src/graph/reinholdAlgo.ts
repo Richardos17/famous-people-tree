@@ -27,7 +27,7 @@ export default function createPositionTree(
 ): Map<string, FinalPositionNode> {
   const adjList = preprocessEdges(familyGraph, directionUpwards);
   firstPass(adjList, startNode, 1, !directionUpwards);
-
+  //TODO fix algorithm for albert einstein family tree
   const children = adjList.get(startNode) || [];
   const rootNode: FinalPositionNode = { x: 0, y: 0, wikidataId: startNode };
   let rootNodeMod = 0;
@@ -100,7 +100,7 @@ function preprocessEdges(
 
 const siblingDist: number = 300;
 const verticalDist: number = 300;
-const subTreeDist: number = 20;
+const subTreeDist: number = 300;
 
 type RecursionData = {
   childrenMidpoint: number;

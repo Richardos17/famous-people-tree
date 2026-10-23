@@ -12,6 +12,7 @@
   "dependencies": {
     "@xyflow/react": "^12.11.6",
     "d3": "^7.9.0",
+    "fs": "^0.0.1-security",
     "next": "^16.3.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -23,7 +24,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

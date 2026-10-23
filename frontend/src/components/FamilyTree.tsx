@@ -54,12 +54,13 @@ export default function FamilyTree({centerPersonId, depth}:FamilyTreeProps) {
       return
     if(!depth || depth <= 0)
       return
-   /* fetchBasicTree(centerPersonId, depth).then((data) => {
+    /*fetchBasicTree(centerPersonId, depth).then((data) => {
       console.log(data)
       const familyGraph = mapResponseToFamilyGraph(data);
       setGraph(familyGraph);
     });*/
-    setGraph(fetchMockData)
+    const mockGraph = mapResponseToFamilyGraph(fetchMockData());
+    setGraph(mockGraph)
   }, [centerPersonId, depth]);
 
   const initialLayout = useMemo<FamilyTreeLayout>(
