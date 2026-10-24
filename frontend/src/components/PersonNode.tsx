@@ -38,6 +38,7 @@ export default function PersonNode({ id, data }: NodeProps<PersonNode>) {
           {data.person.name}
         </h3>
         <span className="space-y-1 text-sm font-medium text-gray-700">
+                  {data.person.wikidataId + "\n"}
           {(data.person.birthDate
             ? data.person.birthDate.getFullYear().toString()
             : "Unknown") +

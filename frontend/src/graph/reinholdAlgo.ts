@@ -42,8 +42,8 @@ export default function createPositionTree(
             existing[existing.length - 1].shift)) /
           2;
   }
-  secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x);
-
+  secondPass(adjList, startNode, 0, /*rootNodeMod + rootNode.x*/0);
+  console.log(adjList)
   const finalPositionNodeMap: Map<string, FinalPositionNode> = new Map();
   adjList
     .values()
@@ -120,6 +120,8 @@ export function firstPass(
   const leftmostNodeST: Countour = new Countour(); //stores leftmost node's of current node
   children.forEach((node, i) => {
     //iterate over all children of current node
+    if(node.wikidataId == "Q88665")
+      console.log("herman")
     let leftmostNodeCurrentST: Countour = new Countour(); //current child's leftmost children
     if (
       adjList.has(node.wikidataId) &&
@@ -185,7 +187,7 @@ export function firstPass(
     rightmostNodeSTMap.merge(contour);
   });
   return {
-    childrenMidpoint: (xPos - siblingDist + firstNodeX) / 2,
+    childrenMidpoint: (children[children.length-1].shift + children[children.length-1].x + children[0].x) / 2,
     rightmostNodeST: rightmostNodeSTMap,
     leftmostNodeCurrentST: leftmostNodeST,
   };
