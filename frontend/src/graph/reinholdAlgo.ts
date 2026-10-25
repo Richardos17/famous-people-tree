@@ -42,8 +42,7 @@ export default function createPositionTree(
             existing[existing.length - 1].shift)) /
           2;
   }
-  secondPass(adjList, startNode, 0, /*rootNodeMod + rootNode.x*/0);
-  console.log(adjList)
+  secondPass(adjList, startNode, 0, rootNodeMod + rootNode.x);
   const finalPositionNodeMap: Map<string, FinalPositionNode> = new Map();
   adjList
     .values()
@@ -118,10 +117,8 @@ export function firstPass(
   let xPos: number = firstNodeX;
   const rightmostNodeContours: Countour[] = []; //used to save rightmost element maps of all children
   const leftmostNodeST: Countour = new Countour(); //stores leftmost node's of current node
+  
   children.forEach((node, i) => {
-    //iterate over all children of current node
-    if(node.wikidataId == "Q88665")
-      console.log("herman")
     let leftmostNodeCurrentST: Countour = new Countour(); //current child's leftmost children
     if (
       adjList.has(node.wikidataId) &&
@@ -151,6 +148,8 @@ export function firstPass(
     node.y = level * verticalDist * (directionUpwards ? -1 : 1);
     xPos += siblingDist;
 
+    leftmostNodeST.merge(leftmostNodeCurrentST, true);
+
     if (i == 0) return; //cant deduce shifting when it's the first left child
 
     //apply shifts which we're caused by previous nodes
@@ -161,7 +160,6 @@ export function firstPass(
       level,
       node.mod,
     );
-    leftmostNodeST.merge(leftmostNodeCurrentST, true);
     let shiftNeeded = 0;
     let leftSubtreeIndex = -1; //index of most conflicting sibling
     for (let j = 0; j < i; j++) {

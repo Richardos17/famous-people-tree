@@ -140,7 +140,7 @@ export function layoutFamilyTree(
           if (currentIsParent) {
             const nodePosition = positionTree.get(newPerson.wikidataId)
             if(nodePosition === undefined)
-              throw new Error("Node doesn't have defined position")
+              throw new Error("Node doesn't have defined position: " + newPerson.wikidataId)
             nodes.set(newPerson.wikidataId, {
               id: newPerson.wikidataId,
               data: {
