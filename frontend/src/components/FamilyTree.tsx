@@ -32,6 +32,8 @@ import { fetchMockData } from "@/api/mockApi";
 import { fetchBasicTree } from "@/api/familyTreeApi";
 import { mapResponseToFamilyGraph } from "@/utils/FamilyGraphMapper";
 import PersonDetail from "./PersonDetail";
+import { publicConfig } from "@/config/env";
+import { ApiTreeResponse } from "@/types/apiTypes/ApiTreeResponse";
 const nodeTypes = {
   person: PersonNode,
 };
@@ -39,29 +41,18 @@ const edgeTypes = {
   parent: RelationshipEdge,
 };
 type FamilyTreeProps = {
-    centerPersonId?: string,
-    depth?: number
+    centerPersonId: string
+    apiResponse: ApiTreeResponse | null
 };
-export default function FamilyTree({centerPersonId, depth}:FamilyTreeProps) {
-  const [graph, setGraph] = useState<FamilyGraph>({
-    persons: new Map(),
-    relationships: [],
-  });
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>();
-  
-  useEffect(() => {
-    if(!centerPersonId || centerPersonId === "")
-      return
-    if(!depth || depth <= 0)
-      return
-    /*fetchBasicTree(centerPersonId, depth).then((data) => {
-      console.log(data)
-      const familyGraph = mapResponseToFamilyGraph(data);
-      setGraph(familyGraph);
-    });*/
-    const mockGraph = mapResponseToFamilyGraph(fetchMockData());
-    setGraph(mockGraph)
-  }, [centerPersonId, depth]);
+const emptyGraph: FamilyGraph = { persons: new Map(), relationships: [] };
+
+export default function FamilyTree({centerPersonId, apiResponse}:FamilyTreeProps) {
+  const graph = useMemo(
+    () => (apiResponse ? mapResponseToFamilyGraph(apiResponse) : emptyGraph),
+    [apiResponse]
+  );
+
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
   const initialLayout = useMemo<FamilyTreeLayout>(
     () =>
