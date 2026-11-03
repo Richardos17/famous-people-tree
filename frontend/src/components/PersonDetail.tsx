@@ -37,14 +37,23 @@ export default function PersonDetail({
           {personData.birthDate && (
             <div>
               <span className="font-medium text-gray-700">Born:</span>{" "}
-              {personData.birthDate.toLocaleDateString()}{personData.bornIn && ` (${personData.bornIn.name})` }
+              {personData.birthDate.toLocaleDateString()}
+              {personData.bornIn && ` (${personData.bornIn.name})`}
             </div>
           )}
           {personData.deathDate && (
-            <div>
-              <span className="font-medium text-gray-700">Died:</span>{" "}
-              {personData.deathDate.toLocaleDateString()}
-            </div>
+            <>
+              {!personData.birthDate && (
+                <div>
+                  <span className="font-medium text-gray-700">Born:</span>
+                  {" Unknown"}
+                </div>
+              )}
+              <div>
+                <span className="font-medium text-gray-700">Died:</span>{" "}
+                {personData.deathDate.toLocaleDateString()}
+              </div>
+            </>
           )}
           {personData.height && (
             <div>
