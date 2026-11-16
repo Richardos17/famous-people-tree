@@ -16,12 +16,17 @@ import createPositionTree, {
   PositionTree,
 } from "./reinholdAlgo";
 
+type FamilyTreeNode = Node<{
+  person: Person;
+  handlePosition: HandlePosition;
+}>;
+
 export function layoutFamilyTree(
   graph: FamilyGraph,
   centerNodeId: string,
 ): FamilyTreeLayout {
   const personEdges: Map<string, PersonConnectedEdges> = new Map();
-  const nodes: Map<string, Node> = new Map();
+  const nodes: Map<string, FamilyTreeNode> = new Map();
   const edges: Edge[] = [];
   //create layout with nodes
   const centerPerson: Person | undefined = graph.persons.get(centerNodeId);
@@ -229,7 +234,7 @@ export function layoutFamilyTree(
   return { nodes: nodes.values().toArray(), edges: edges };
 }
 function updateHandlePosition(
-  node: Node | undefined,
+  node: FamilyTreeNode | undefined,
   options: {
     top?: boolean;
     bottom?: boolean;
