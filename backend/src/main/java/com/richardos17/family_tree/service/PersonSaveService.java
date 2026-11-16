@@ -6,7 +6,6 @@ import java.util.List;
 
 
 import com.richardos17.family_tree.domain.ExpandedPerson;
-import com.richardos17.family_tree.domain.FamilyRelationship;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

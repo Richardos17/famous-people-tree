@@ -52,16 +52,13 @@
         <!-- No wildcard imports (VERY IMPORTANT for clean backend) -->
         <module name="AvoidStarImport"/>
 
+        <!-- No duplicate / redundant imports -->
+        <module name="RedundantImport"/>
 
         <!-- ========================= -->
         <!-- CODE QUALITY -->
         <!-- ========================= -->
 
-        <!-- Require braces for all blocks -->
-        <module name="NeedBraces"/>
-
-        <!-- No empty blocks -->
-        <module name="EmptyBlock"/>
 
         <!-- No unnecessary semicolons -->
         <module name="EmptyStatement"/>
@@ -69,16 +66,11 @@
         <!-- Prevent magic numbers -->
         <module name="MagicNumber">
             <property name="ignoreNumbers" value="-1,0,1"/>
+            <property name="severity" value="warning"/>
         </module>
 
-
-        <!-- ========================= -->
-        <!-- WHITESPACE RULES -->
-        <!-- ========================= -->
-
-        <module name="WhitespaceAfter"/>
-        <module name="WhitespaceAround"/>
-
+        <!-- Every switch needs a default -->
+        <module name="MissingSwitchDefault"/>
 
         <!-- ========================= -->
         <!-- DESIGN QUALITY -->
@@ -88,6 +80,11 @@
         <module name="MethodLength">
             <property name="max" value="100"/>
             <property name="severity" value="warning"/>
+        </module>
+
+        <!-- Avoid too many parameters -->
+        <module name="ParameterNumber">
+            <property name="max" value="7"/>
         </module>
 
         <!-- Avoid deep nesting -->

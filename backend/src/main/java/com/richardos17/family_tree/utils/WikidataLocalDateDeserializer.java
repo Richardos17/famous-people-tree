@@ -15,8 +15,7 @@ public class WikidataLocalDateDeserializer extends StdDeserializer<LocalDate> {
     }
 
     @Override
-    public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) 
-            {
+    public LocalDate deserialize(JsonParser p, DeserializationContext ctxt){
         String dateString = p.getValueAsString();
         return parseWikidataDate(dateString);
     }
@@ -34,8 +33,7 @@ public class WikidataLocalDateDeserializer extends StdDeserializer<LocalDate> {
             return null;
         }
     
-        try {
-            // Parse as ZonedDateTime to handle timezone information, then extract date
+        try { // Parse as ZonedDateTime to handle timezone information, then extract date
             return ZonedDateTime.parse(wikidataDateString).toLocalDate();
         } catch (Exception e) {
             // Fallback: return null for invalid dates (like URLs) instead of throwing exception

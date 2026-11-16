@@ -2,13 +2,17 @@ package com.richardos17.family_tree.controller;
 
 import com.richardos17.family_tree.DTOs.PersonDTO;
 import com.richardos17.family_tree.DTOs.PersonTreeResponseDTO;
-import com.richardos17.family_tree.domain.Person;
 import com.richardos17.family_tree.repository.PersonRepository;
 import com.richardos17.family_tree.service.PersonService;
 import com.richardos17.family_tree.service.PersonMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;

@@ -172,7 +172,6 @@ public class DatabaseBootstrapSeeder implements CommandLineRunner {
                 MERGE (lucas)-[:CITIZEN_OF {start_date:date("1997-09-09"), end_date:date("2024-12-31")}]->(fr)
                 MERGE (sophie)-[:CITIZEN_OF {start_date:date("1999-12-30"), end_date:date("2024-12-31")}]->(fr)
                 """).run();
-
         System.out.println("Bootstrap seeding completed");
     }
 }
