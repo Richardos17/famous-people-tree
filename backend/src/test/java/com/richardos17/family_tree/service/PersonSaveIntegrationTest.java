@@ -236,6 +236,7 @@ class PersonSaveIntegrationTest {
         assertThat(marriage.getEndDate()).isEqualTo(LocalDate.of(1919, 2, 14));
         assertThat(marriage.getSpouse()).isEqualTo(mileva);
     }
+    //TODO remove this, or use it
     /*
     @Test
     void savePerson_withMultipleSpouses_allMarriagesPersisted() {

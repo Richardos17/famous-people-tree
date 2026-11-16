@@ -137,6 +137,21 @@ class PersonServiceIntegrationTest {
 
     @Test
     void getPersonsByName_inDb() {
+        String response = """
+                {
+                  "results": {
+                    "bindings": [
+                      {
+                        "person":      {"value": "http://www.wikidata.org/entity/Q937"},
+                        "personLabel": {"value": "Albert Einstein"},
+                        "birthDate":   {"value": "1879-03-14T00:00:00Z"},
+                        "image":       {"value": "http://example.com/einstein.jpg"},
+                        "wikipedia":   {"value": "https://en.wikipedia.org/wiki/Albert_Einstein"}
+                      }
+                    ]
+                  }
+                }""";
+        when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just(response));
         personRepository.save(Person.builder().wikidataId("Q937").name("Albert Einstein").build());
         List<Person> result = personService.getPersonsByName("Einstein");
 

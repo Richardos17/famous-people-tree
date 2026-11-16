@@ -61,7 +61,7 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
     @Query("""
     MATCH (person1:Person {localId: $spouse1LocalId})
     MATCH (person2:Person {localId: $spouse2LocalId})
-    MERGE (person1)-[r:MARRIED_TO]->(person2)
+    MERGE (person1)-[r:MARRIED_TO]-(person2)
     SET r.start_date = $startDate,
         r.end_date = $endDate
     """)
